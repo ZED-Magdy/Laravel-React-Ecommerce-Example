@@ -1,8 +1,6 @@
 import React from 'react';
 import { FilterPopup } from '@/components/ui/filter-popup';
 import { ProductDetails } from '@/components/ui/product-details';
-import { SearchInput } from '@/components/ui/search-input';
-import { Button } from '@/components/ui/button';
 import { QuantityControls } from '@/components/ui/quantity-controls';
 import { OrderSummary } from '@/components/ui/order-summary';
 
@@ -119,108 +117,156 @@ export const ProductsListPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex flex-col space-y-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <FilterPopup onApplyFilters={setFilters} />
-              <h1 className="text-2xl font-bold">Products</h1>
-            </div>
-            <div className="flex items-center space-x-4">
-              <Button variant="outline" size="icon" className="h-10 w-10 rounded-lg">
+      {/* Breadcrumb */}
+      <div className="container mx-auto px-20 py-4">
+        <div className="flex items-center text-sm">
+          <a href="#" className="text-gray-500 hover:text-gray-700">Home</a>
+          <span className="mx-2 text-gray-500">/</span>
+          <span className="text-gray-900">Casual</span>
+        </div>
+      </div>
+
+      <div className="container mx-auto px-4 md:px-20">
+        {/* Rest of the content */}
+        <div className="flex justify-between space-y-6">
+          {/* Search and Filter Area */}
+          <div className="bg-white shadow-sm rounded-lg p-6 w-full md:w-3/4">
+            <div className="flex flex-col space-y-4">
+              {/* Search Bar */}
+              <div className="relative">
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search by product name"
+                  className="w-full h-[46px] pl-10 pr-4 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-gray-200"
+                />
                 <svg
+                  className="absolute left-3 top-3.5 h-5 w-5 text-gray-400"
                   xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
+                  viewBox="0 0 20 20"
                   fill="none"
                   stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="h-5 w-5"
                 >
-                  <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" />
-                  <path d="M3 6h18" />
-                  <path d="M16 10a4 4 0 0 1-8 0" />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                  />
                 </svg>
-              </Button>
-            </div>
-          </div>
+              </div>
 
-          <div className="flex flex-col sm:flex-row gap-4">
-            <div className="w-full sm:w-[400px]">
-              <SearchInput
-                value={searchQuery}
-                onChange={setSearchQuery}
-                placeholder="Search by product name"
-              />
-            </div>
-            <div className="flex-1 text-sm text-gray-500 flex items-center">
-              Showing {filteredProducts.length} of {products.length} products
-            </div>
-          </div>
-
-          <div className="flex flex-col lg:flex-row gap-8">
-            {/* Main products area */}
-            <div className="flex-1 space-y-6">
-              {/* top_area remains including search etc */}
-              {/* Use filteredProducts.map to render cards */}
+              {/* Title and Filter */}
+              <div className="flex justify-between items-center">
+                <h1 className="text-2xl font-bold">Casual</h1>
+                <div className="flex items-center space-x-4">
+                  <FilterPopup onApplyFilters={setFilters} />
+                </div>
+              </div>
+{/* Main products area */}
+<div className="flex-1">
               <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
                 {filteredProducts.map((product) => (
                   <div
                     key={product.id}
-                    className="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-md transition cursor-pointer flex flex-col"
+                    className="bg-white border border-gray-100 rounded-lg shadow-sm overflow-hidden hover:shadow-md transition"
                   >
-                    <div
-                      className="relative aspect-square"
-                      onClick={() => handleProductClick(product)}
-                    >
+                    <div className="relative aspect-square">
                       <img
                         src={product.image}
                         alt={product.name}
                         className="w-full h-full object-cover"
                       />
                       {getQty(product.id) > 0 && (
-                        <span className="absolute top-2 right-2 bg-blue-600 text-white text-xs font-medium rounded-full w-6 h-6 flex items-center justify-center">
+                        <span className="absolute top-4 right-4 bg-blue-600 text-white text-sm font-medium rounded-full w-8 h-8 flex items-center justify-center shadow-md">
                           {getQty(product.id)}
                         </span>
                       )}
                     </div>
-                    <div className="p-4 flex flex-col gap-3 flex-1">
+                    <div className="p-4 space-y-3">
                       <div className="flex justify-between items-start gap-2">
-                        <h3 className="font-medium text-base line-clamp-2 flex-1" onClick={() => handleProductClick(product)}>
+                        <h3 
+                          className="font-medium text-base line-clamp-2 flex-1 cursor-pointer"
+                          onClick={() => handleProductClick(product)}
+                        >
                           {product.name}
                         </h3>
-                        <span className="bg-gray-100 text-xs px-2 py-1 rounded self-start">
+                        <span className="bg-gray-100 text-xs px-2 py-1 rounded">
                           {product.category}
                         </span>
                       </div>
-                      <div className="flex justify-between items-center text-sm">
-                        <span className="font-semibold text-lg">${product.price}</span>
-                        <span className="text-gray-500">Stock: {product.stock}</span>
+                      <div className="flex justify-between items-center">
+                        <span className="font-bold text-lg">${product.price}</span>
+                        <span className="text-sm text-gray-500">Stock: {product.stock}</span>
                       </div>
-                      <QuantityControls
-                        value={getQty(product.id)}
-                        min={0}
-                        max={product.stock}
-                        onChange={(qty) => updateQuantity(product.id, qty)}
-                      />
+                      <div className="border rounded-lg p-[1px]">
+                        <QuantityControls
+                          value={getQty(product.id)}
+                          min={0}
+                          max={product.stock}
+                          onChange={(qty) => updateQuantity(product.id, qty)}
+                        />
+                      </div>
                     </div>
                   </div>
                 ))}
               </div>
+
+              {/* Pagination */}
+              <div className="flex justify-between items-center mt-8">
+                <button className="flex items-center text-gray-400 hover:text-gray-600">
+                  <svg
+                    className="h-4 w-4 mr-2"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M15 18l-6-6 6-6" />
+                  </svg>
+                  Previous
+                </button>
+                <div className="flex items-center space-x-2">
+                  <button className="h-8 w-8 bg-black text-white rounded flex items-center justify-center">
+                    1
+                  </button>
+                </div>
+                <button className="flex items-center text-gray-400 hover:text-gray-600">
+                  Next
+                  <svg
+                    className="h-4 w-4 ml-2"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M9 18l6-6-6-6" />
+                  </svg>
+                </button>
+              </div>
             </div>
-            {/* Order summary */}
-            <div className="hidden lg:block lg:w-80 xl:w-96">
-              <OrderSummary
-                cart={cart}
-                products={products}
-                onUpdateQuantity={updateQuantity}
-                onRemoveItem={handleRemoveItem}
-              />
+              {/* Results Count */}
+              <div className="text-sm text-gray-500">
+                Showing {filteredProducts.length} of {products.length} Products
+              </div>
             </div>
           </div>
+          {/* Order Summary */}
+          <div className="hidden lg:block w-1/4">
+              <div className="bg-white rounded-lg shadow-sm p-6">
+                <OrderSummary
+                  cart={cart}
+                  products={products}
+                  onUpdateQuantity={updateQuantity}
+                  onRemoveItem={handleRemoveItem}
+                />
+              </div>
+            </div>
         </div>
 
         <ProductDetails

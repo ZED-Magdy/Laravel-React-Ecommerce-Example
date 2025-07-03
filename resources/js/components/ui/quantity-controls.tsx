@@ -17,20 +17,22 @@ export const QuantityControls: React.FC<QuantityControlsProps> = ({
   size = 'md',
 }) => {
   const btnSize = size === 'sm' ? 'h-8 w-8' : 'h-10 w-10';
-  const fontSize = size === 'sm' ? 'text-base' : 'text-lg';
+  const inputSize = size === 'sm' ? 'h-8 w-8' : 'h-10 w-10';
+  const fontSize = size === 'sm' ? 'text-sm' : 'text-base';
+
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center">
       <Button
-        variant="outline"
+        variant="ghost"
         size="icon"
-        className={`${btnSize} rounded-lg`}
+        className={`${btnSize} bg-gray-100 rounded-l-lg hover:bg-gray-200`}
         onClick={() => onChange(Math.max(value - 1, min))}
         disabled={value <= min}
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
-          width="24"
-          height="24"
+          width="16"
+          height="16"
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
@@ -42,20 +44,20 @@ export const QuantityControls: React.FC<QuantityControlsProps> = ({
           <path d="M5 12h14" />
         </svg>
       </Button>
-      <span className={`${fontSize} font-medium w-6 text-center`}>
+      <div className={`${inputSize} flex items-center justify-center ${fontSize} font-medium bg-white`}>
         {value}
-      </span>
+      </div>
       <Button
-        variant="outline"
+        variant="ghost"
         size="icon"
-        className={`${btnSize} rounded-lg`}
+        className={`${btnSize} bg-gray-100 rounded-r-lg hover:bg-gray-200`}
         onClick={() => onChange(Math.min(value + 1, max))}
         disabled={value >= max}
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
-          width="24"
-          height="24"
+          width="16"
+          height="16"
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
@@ -64,8 +66,8 @@ export const QuantityControls: React.FC<QuantityControlsProps> = ({
           strokeLinejoin="round"
           className="h-4 w-4"
         >
-          <path d="M5 12h14" />
           <path d="M12 5v14" />
+          <path d="M5 12h14" />
         </svg>
       </Button>
     </div>

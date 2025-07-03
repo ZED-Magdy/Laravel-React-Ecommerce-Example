@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { Search, ShoppingCart, Menu, X } from 'lucide-react';
 
 export const Navbar: React.FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const location = useLocation();
 
   return (
     <header className="bg-white">
@@ -14,7 +13,7 @@ export const Navbar: React.FC = () => {
           <div className="flex items-center">
             {/* Logo */}
             <Link to="/" className="flex items-center mr-6 lg:mr-8">
-              <div className="w-20 lg:w-28 h-8 lg:h-10">
+              <div className="w-20 lg:w-30 h-8 lg:h-10">
                 <img 
                   src="/images/logo.png" 
                   alt="izam" 

@@ -11,6 +11,13 @@ export const Navbar: React.FC = () => {
         <div className="flex items-center justify-between h-16 lg:h-17">
           {/* Left section - Logo and Navigation */}
           <div className="flex items-center">
+            {/* Mobile menu button */}
+            <button
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="md:hidden p-2 hover:bg-gray-100 rounded"
+            >
+              {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            </button>
             {/* Logo */}
             <Link to="/" className="flex items-center mr-6 lg:mr-8">
               <div className="w-20 lg:w-30 h-8 lg:h-10">
@@ -56,13 +63,13 @@ export const Navbar: React.FC = () => {
               Login
             </Link>
 
-            {/* Mobile menu button */}
-            <button
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="md:hidden p-2 hover:bg-gray-100 rounded"
-            >
-              {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-            </button>
+            <Link 
+                to="/login" 
+                className="bg-black text-white px-4 py-2 rounded text-sm font-medium font-roboto hover:bg-gray-800 text-center sm:hidden"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                Login
+              </Link>
           </div>
         </div>
 
@@ -80,13 +87,7 @@ export const Navbar: React.FC = () => {
               <button className="bg-black text-white px-4 py-2 rounded text-sm font-medium font-roboto hover:bg-gray-800 text-left">
                 Sell Your Product
               </button>
-              <Link 
-                to="/login" 
-                className="bg-black text-white px-4 py-2 rounded text-sm font-medium font-roboto hover:bg-gray-800 text-center sm:hidden"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                Login
-              </Link>
+              
             </div>
           </div>
         )}

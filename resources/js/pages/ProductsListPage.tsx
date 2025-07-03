@@ -3,6 +3,8 @@ import { FilterPopup } from '@/components/ui/filter-popup';
 import { ProductDetails } from '@/components/ui/product-details';
 import { SearchInput } from '@/components/ui/search-input';
 import { Button } from '@/components/ui/button';
+import { QuantityControls } from '@/components/ui/quantity-controls';
+import { OrderSummary } from '@/components/ui/order-summary';
 
 interface Product {
   id: number;
@@ -21,6 +23,7 @@ export const ProductsListPage: React.FC = () => {
     priceRange: 0,
     categories: [] as string[],
   });
+  const [cart, setCart] = React.useState<Record<number, number>>({});
 
   // Mock products data
   const products: Product[] = [
@@ -94,6 +97,26 @@ export const ProductsListPage: React.FC = () => {
     setIsDetailsOpen(false);
   };
 
+  const updateQuantity = (id: number, qty: number) => {
+    setCart((prev) => {
+      if (qty <= 0) {
+        const { [id]: _, ...rest } = prev;
+        return rest;
+      }
+      return { ...prev, [id]: qty };
+    });
+  };
+
+  const getQty = (id: number) => cart[id] ?? 0;
+
+  const handleAddOne = (id: number, stock: number) => {
+    updateQuantity(id, Math.min(getQty(id) + 1, stock));
+  };
+
+  const handleRemoveItem = (id: number) => {
+    updateQuantity(id, 0);
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto px-4 py-8">
@@ -138,43 +161,65 @@ export const ProductsListPage: React.FC = () => {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredProducts.map((product) => (
-              <div
-                key={product.id}
-                className="bg-white rounded-xl shadow-sm overflow-hidden cursor-pointer transition-transform hover:scale-[1.02]"
-                onClick={() => handleProductClick(product)}
-              >
-                <div className="aspect-square relative">
-                  <img
-                    src={product.image}
-                    alt={product.name}
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute top-3 right-3">
-                    <div className="bg-white/90 backdrop-blur-sm text-xs font-medium px-2 py-1 rounded">
-                      Stock: {product.stock}
+          <div className="flex flex-col lg:flex-row gap-8">
+            {/* Main products area */}
+            <div className="flex-1 space-y-6">
+              {/* top_area remains including search etc */}
+              {/* Use filteredProducts.map to render cards */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+                {filteredProducts.map((product) => (
+                  <div
+                    key={product.id}
+                    className="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-md transition cursor-pointer flex flex-col"
+                  >
+                    <div
+                      className="relative aspect-square"
+                      onClick={() => handleProductClick(product)}
+                    >
+                      <img
+                        src={product.image}
+                        alt={product.name}
+                        className="w-full h-full object-cover"
+                      />
+                      {getQty(product.id) > 0 && (
+                        <span className="absolute top-2 right-2 bg-blue-600 text-white text-xs font-medium rounded-full w-6 h-6 flex items-center justify-center">
+                          {getQty(product.id)}
+                        </span>
+                      )}
+                    </div>
+                    <div className="p-4 flex flex-col gap-3 flex-1">
+                      <div className="flex justify-between items-start gap-2">
+                        <h3 className="font-medium text-base line-clamp-2 flex-1" onClick={() => handleProductClick(product)}>
+                          {product.name}
+                        </h3>
+                        <span className="bg-gray-100 text-xs px-2 py-1 rounded self-start">
+                          {product.category}
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center text-sm">
+                        <span className="font-semibold text-lg">${product.price}</span>
+                        <span className="text-gray-500">Stock: {product.stock}</span>
+                      </div>
+                      <QuantityControls
+                        value={getQty(product.id)}
+                        min={0}
+                        max={product.stock}
+                        onChange={(qty) => updateQuantity(product.id, qty)}
+                      />
                     </div>
                   </div>
-                </div>
-                <div className="p-4">
-                  <h2 className="text-lg font-semibold mb-1">{product.name}</h2>
-                  <p className="text-sm text-gray-500 mb-3">{product.category}</p>
-                  <div className="flex justify-between items-center">
-                    <span className="text-xl font-bold">${product.price}</span>
-                    <Button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleAddToCart(1);
-                      }}
-                      className="h-10"
-                    >
-                      Add to Cart
-                    </Button>
-                  </div>
-                </div>
+                ))}
               </div>
-            ))}
+            </div>
+            {/* Order summary */}
+            <div className="hidden lg:block lg:w-80 xl:w-96">
+              <OrderSummary
+                cart={cart}
+                products={products}
+                onUpdateQuantity={updateQuantity}
+                onRemoveItem={handleRemoveItem}
+              />
+            </div>
           </div>
         </div>
 

@@ -8,8 +8,8 @@ export const LoginPage: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-white px-4">
-      <Card className="w-full max-w-md shadow-[0_0.125rem_0.5rem_0px_rgba(0,0,0,0.08)] rounded-md border-0 p-8">
+    <div className="my-24 md:my-0 md:min-h-[calc(100vh-6.5rem)] flex items-center justify-center px-4">
+      <Card className="bg-transparent shadow-none md:bg-white  w-full max-w-md md:shadow-[0_0.125rem_0.5rem_0px_rgba(0,0,0,0.08)] rounded-md border-0 p-8">
         <div className="space-y-1 text-center mb-6">
           <h1 className="text-2xl font-semibold">Welcome back</h1>
           <p className="text-sm text-gray-500">

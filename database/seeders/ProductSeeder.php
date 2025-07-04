@@ -15,7 +15,7 @@ class ProductSeeder extends Seeder
     {
         $product1 = Product::create([
             'title' => 'Black Striped T-shirt',
-            'price' => 12000,
+            'price' => 120,
             'category_id' => 1,
             'stock' => 30,
         ]);
@@ -25,7 +25,7 @@ class ProductSeeder extends Seeder
 
         $product2 = Product::create([
             'title' => 'Polo with Tipping Details',
-            'price' => 18000,
+            'price' => 180,
             'category_id' => 2,
             'stock' => 18,
         ]);
@@ -35,7 +35,7 @@ class ProductSeeder extends Seeder
 
         $product3 = Product::create([
             'title' => 'Classic Blue Jeans',
-            'price' => 20000,
+            'price' => 200,
             'category_id' => 3,
             'stock' => 15,
         ]);
@@ -45,7 +45,7 @@ class ProductSeeder extends Seeder
 
         $product4 = Product::create([
             'title' => 'Plaid Flannel Shirt',
-            'price' => 25000,
+            'price' => 250,
             'category_id' => 4,
             'stock' => 22,
         ]);
@@ -55,7 +55,7 @@ class ProductSeeder extends Seeder
 
         $product5 = Product::create([
             'title' => 'Black Cotton T-shirt',
-            'price' => 11000,
+            'price' => 110,
             'category_id' => 1,
             'stock' => 20,
         ]);
@@ -65,7 +65,7 @@ class ProductSeeder extends Seeder
 
         $product6 = Product::create([
             'title' => 'White Cotton T-shirt',
-            'price' => 14500,
+            'price' => 145,
             'category_id' => 1,
             'stock' => 20,
         ]);

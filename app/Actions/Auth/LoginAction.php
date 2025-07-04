@@ -18,7 +18,7 @@ final class LoginAction
     {
         // This will fix the execution time of the action to prevent timing attacks
         return (new Timebox)->call(function ($timebox) use ($email, $password): array {
-            $user = \App\Models\User::query()->where('email', $email)->first();
+            $user = User::query()->where('email', $email)->first(['id', 'name', 'email', 'password']);
             // dummy hash if user doesn't exist
             $hashedPassword = $user->password ?? '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi';
 

@@ -2,7 +2,7 @@ openapi: 3.0.3
 info:
   title: Daftra E-commerce API
   description: |
-    RESTful API for Daftra E-commerce platform providing authentication and user management endpoints.
+    RESTful API for Daftra E-commerce platform providing authentication, user management, and catalog browsing endpoints.
     
     ## Authentication
     This API uses Bearer token authentication with Laravel Sanctum. Include the token in the Authorization header:
@@ -12,6 +12,11 @@ info:
     - Timing attack prevention on login endpoints
     - Secure password hashing with bcrypt
     - Rate limiting on authentication endpoints
+    
+    ## Performance Features
+    - Intelligent caching on catalog endpoints
+    - Optimized database queries
+    - Fast response times
     
     ## Response Format
     All responses follow a consistent JSON format with appropriate HTTP status codes.
@@ -181,6 +186,57 @@ paths:
                   value:
                     message: "Unauthenticated."
 
+  /categories:
+    get:
+      tags:
+        - Catalog
+      summary: Get All Categories
+      description: |
+        Retrieve all available product categories.
+        
+        **Features:**
+        - No authentication required (public endpoint)
+        - Results are cached for 1 hour for optimal performance
+        - Returns categories with ID and title only
+        
+        **Response:**
+        Returns an array of all available categories in the system.
+      operationId: getCategories
+      security: []
+      responses:
+        '200':
+          description: Categories retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Category'
+              examples:
+                success:
+                  summary: List of categories
+                  value:
+                    - id: 1
+                      title: "Electronics"
+                    - id: 2
+                      title: "Clothing"
+                    - id: 3
+                      title: "Books"
+                empty:
+                  summary: No categories available
+                  value: []
+        '405':
+          description: Method not allowed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                method_not_allowed:
+                  summary: Invalid HTTP method
+                  value:
+                    message: "The GET method is not supported for this route. Supported methods: POST."
+
 components:
   securitySchemes:
     bearerAuth:
@@ -319,6 +375,28 @@ components:
           password:
             - "The password field is required."
 
+    Category:
+      type: object
+      required:
+        - id
+        - title
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: Unique category identifier
+          example: 1
+          minimum: 1
+        title:
+          type: string
+          description: Category name or title
+          example: "Electronics"
+          minLength: 1
+          maxLength: 255
+      example:
+        id: 1
+        title: "Electronics"
+
 tags:
   - name: Authentication
     description: |
@@ -335,6 +413,15 @@ tags:
       
       **Authentication Required:**
       All endpoints in this section require Bearer token authentication.
+      
+  - name: Catalog
+    description: |
+      Product catalog and category management endpoints.
+      
+      **Features:**
+      - Public access (no authentication required)
+      - Cached responses for optimal performance
+      - Browse available categories and products
 
 externalDocs:
   description: Find more info about Daftra E-commerce API

@@ -102,7 +102,7 @@ test('user endpoint works with valid sanctum token', function (): void {
 
     // Act
     $response = $this->withHeaders([
-        'Authorization' => 'Bearer ' . $token,
+        'Authorization' => 'Bearer '.$token,
     ])->getJson('/api/user');
 
     // Assert

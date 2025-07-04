@@ -2,7 +2,7 @@ openapi: 3.0.3
 info:
   title: Daftra E-commerce API
   description: |
-    RESTful API for Daftra E-commerce platform providing authentication, user management, and catalog browsing endpoints.
+    RESTful API for Daftra E-commerce platform providing authentication, user management, and comprehensive catalog browsing endpoints.
     
     ## Authentication
     This API uses Bearer token authentication with Laravel Sanctum. Include the token in the Authorization header:
@@ -14,9 +14,17 @@ info:
     - Rate limiting on authentication endpoints
     
     ## Performance Features
-    - Intelligent caching on catalog endpoints
-    - Optimized database queries
-    - Fast response times
+    - Intelligent caching on catalog endpoints (1-hour cache)
+    - Optimized database queries with proper indexing
+    - Fast response times with minimal database load
+    - Efficient pagination for large datasets
+    
+    ## Catalog Features
+    - Advanced product filtering by category, price range, and search
+    - Laravel-standard pagination with metadata
+    - Products ordered by price for consistent browsing
+    - Real-time stock information
+    - Thumbnail image support
     
     ## Response Format
     All responses follow a consistent JSON format with appropriate HTTP status codes.
@@ -237,6 +245,168 @@ paths:
                   value:
                     message: "The GET method is not supported for this route. Supported methods: POST."
 
+  /products:
+    get:
+      tags:
+        - Catalog
+      summary: Get Products with Filtering and Pagination
+      description: |
+        Retrieve products with advanced filtering and pagination capabilities.
+        
+        **Features:**
+        - No authentication required (public endpoint)
+        - Results are cached for 1 hour for optimal performance
+        - Advanced filtering by category, price range, and search
+        - Paginated results with Laravel pagination format
+        - Products ordered by price (ascending)
+        
+        **Filtering Options:**
+        - **category_id**: Filter by specific category
+        - **price_min**: Minimum price filter (in cents)
+        - **price_max**: Maximum price filter (in cents)
+        - **search**: Search in product titles
+        - **page**: Pagination page number
+        
+        **Response:**
+        Returns paginated products with metadata including total count, current page, and pagination links.
+      operationId: getProducts
+      security: []
+      parameters:
+        - name: category_id
+          in: query
+          description: Filter products by category ID
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+          example: 1
+        - name: price_min
+          in: query
+          description: Minimum price filter in cents (e.g., 1000 = $10.00)
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+          example: 1000
+        - name: price_max
+          in: query
+          description: Maximum price filter in cents (e.g., 5000 = $50.00)
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+          example: 5000
+        - name: search
+          in: query
+          description: Search term for product titles
+          required: false
+          schema:
+            type: string
+            maxLength: 255
+          example: "phone"
+        - name: page
+          in: query
+          description: Page number for pagination
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+          example: 1
+      responses:
+        '200':
+          description: Products retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductPaginatedResponse'
+              examples:
+                success:
+                  summary: Paginated products with filters
+                  value:
+                    data:
+                      - id: 1
+                        title: "iPhone 14 Pro"
+                        price: 999.99
+                        category_id: 1
+                        stock: 25
+                        thumbnail: "https://example.com/thumbnails/iphone14.jpg"
+                      - id: 2
+                        title: "Samsung Galaxy S23"
+                        price: 899.99
+                        category_id: 1
+                        stock: 15
+                        thumbnail: "https://example.com/thumbnails/galaxy-s23.jpg"
+                    links:
+                      first: "http://localhost:8000/api/products?page=1"
+                      last: "http://localhost:8000/api/products?page=3"
+                      prev: null
+                      next: "http://localhost:8000/api/products?page=2"
+                    meta:
+                      current_page: 1
+                      from: 1
+                      last_page: 3
+                      per_page: 15
+                      to: 15
+                      total: 42
+                empty:
+                  summary: No products found
+                  value:
+                    data: []
+                    links:
+                      first: "http://localhost:8000/api/products?page=1"
+                      last: null
+                      prev: null
+                      next: null
+                    meta:
+                      current_page: 1
+                      from: null
+                      last_page: 1
+                      per_page: 15
+                      to: null
+                      total: 0
+        '422':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+              examples:
+                invalid_category:
+                  summary: Invalid category ID
+                  value:
+                    message: "The given data was invalid."
+                    errors:
+                      category_id:
+                        - "The selected category id is invalid."
+                invalid_price:
+                  summary: Invalid price range
+                  value:
+                    message: "The given data was invalid."
+                    errors:
+                      price_min:
+                        - "The price min field must be an integer."
+                      price_max:
+                        - "The price max field must be at least 1."
+                search_too_long:
+                  summary: Search term too long
+                  value:
+                    message: "The given data was invalid."
+                    errors:
+                      search:
+                        - "The search field must not be greater than 255 characters."
+        '405':
+          description: Method not allowed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                method_not_allowed:
+                  summary: Invalid HTTP method
+                  value:
+                    message: "The GET method is not supported for this route. Supported methods: POST."
+
 components:
   securitySchemes:
     bearerAuth:
@@ -397,6 +567,173 @@ components:
         id: 1
         title: "Electronics"
 
+    Product:
+      type: object
+      required:
+        - id
+        - title
+        - price
+        - category_id
+        - stock
+        - thumbnail
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: Unique product identifier
+          example: 1
+          minimum: 1
+        title:
+          type: string
+          description: Product name or title
+          example: "iPhone 14 Pro"
+          minLength: 1
+          maxLength: 255
+        price:
+          type: number
+          format: decimal
+          description: Product price in dollars (calculated from cents storage)
+          example: 999.99
+          minimum: 0
+        category_id:
+          type: integer
+          format: int64
+          description: ID of the category this product belongs to
+          example: 1
+          minimum: 1
+        stock:
+          type: integer
+          description: Available stock quantity
+          example: 25
+          minimum: 0
+        thumbnail:
+          type: string
+          format: uri
+          description: URL to the product thumbnail image
+          example: "https://example.com/thumbnails/iphone14.jpg"
+          nullable: true
+      example:
+        id: 1
+        title: "iPhone 14 Pro"
+        price: 999.99
+        category_id: 1
+        stock: 25
+        thumbnail: "https://example.com/thumbnails/iphone14.jpg"
+
+    ProductPaginatedResponse:
+      type: object
+      required:
+        - data
+        - links
+        - meta
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Product'
+          description: Array of product objects for the current page
+        links:
+          type: object
+          required:
+            - first
+            - last
+            - prev
+            - next
+          properties:
+            first:
+              type: string
+              format: uri
+              description: URL to the first page
+              example: "http://localhost:8000/api/products?page=1"
+            last:
+              type: string
+              format: uri
+              description: URL to the last page
+              example: "http://localhost:8000/api/products?page=5"
+              nullable: true
+            prev:
+              type: string
+              format: uri
+              description: URL to the previous page
+              example: "http://localhost:8000/api/products?page=1"
+              nullable: true
+            next:
+              type: string
+              format: uri
+              description: URL to the next page
+              example: "http://localhost:8000/api/products?page=3"
+              nullable: true
+          description: Pagination navigation links
+        meta:
+          type: object
+          required:
+            - current_page
+            - from
+            - last_page
+            - per_page
+            - to
+            - total
+          properties:
+            current_page:
+              type: integer
+              description: Current page number
+              example: 2
+              minimum: 1
+            from:
+              type: integer
+              description: Index of the first item on the current page
+              example: 16
+              minimum: 1
+              nullable: true
+            last_page:
+              type: integer
+              description: Last page number
+              example: 5
+              minimum: 1
+            per_page:
+              type: integer
+              description: Number of items per page
+              example: 15
+              minimum: 1
+            to:
+              type: integer
+              description: Index of the last item on the current page
+              example: 30
+              minimum: 1
+              nullable: true
+            total:
+              type: integer
+              description: Total number of items across all pages
+              example: 73
+              minimum: 0
+          description: Pagination metadata
+      example:
+        data:
+          - id: 1
+            title: "iPhone 14 Pro"
+            price: 999.99
+            category_id: 1
+            stock: 25
+            thumbnail: "https://example.com/thumbnails/iphone14.jpg"
+          - id: 2
+            title: "Samsung Galaxy S23"
+            price: 899.99
+            category_id: 1
+            stock: 15
+            thumbnail: "https://example.com/thumbnails/galaxy-s23.jpg"
+        links:
+          first: "http://localhost:8000/api/products?page=1"
+          last: "http://localhost:8000/api/products?page=5"
+          prev: "http://localhost:8000/api/products?page=1"
+          next: "http://localhost:8000/api/products?page=3"
+        meta:
+          current_page: 2
+          from: 16
+          last_page: 5
+          per_page: 15
+          to: 30
+          total: 73
+
 tags:
   - name: Authentication
     description: |
@@ -420,8 +757,11 @@ tags:
       
       **Features:**
       - Public access (no authentication required)
-      - Cached responses for optimal performance
+      - Cached responses for optimal performance (1-hour cache)
       - Browse available categories and products
+      - Advanced product filtering and search
+      - Paginated product listings
+      - Real-time stock and pricing information
 
 externalDocs:
   description: Find more info about Daftra E-commerce API

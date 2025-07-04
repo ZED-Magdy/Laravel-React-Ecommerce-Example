@@ -17,7 +17,6 @@ export const QuantityControls: React.FC<QuantityControlsProps> = ({
   size = 'md',
 }) => {
   const btnSize = size === 'sm' ? 'h-8 w-8' : 'h-10 w-10';
-  const inputSize = size === 'sm' ? 'h-8 w-8' : 'h-10 w-10';
   const fontSize = size === 'sm' ? 'text-sm' : 'text-base';
 
   return (

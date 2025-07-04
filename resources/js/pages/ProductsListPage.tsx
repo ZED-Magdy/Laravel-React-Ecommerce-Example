@@ -99,9 +99,6 @@ export const ProductsListPage: React.FC = () => {
 
   const getQty = (id: number) => cart[id] ?? 0;
 
-  const handleAddOne = (id: number, stock: number) => {
-    updateQuantity(id, Math.min(getQty(id) + 1, stock));
-  };
 
   const handleRemoveItem = (id: number) => {
     updateQuantity(id, 0);

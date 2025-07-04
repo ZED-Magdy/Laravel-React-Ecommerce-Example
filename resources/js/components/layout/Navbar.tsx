@@ -7,7 +7,7 @@ export const Navbar: React.FC = () => {
 
   return (
     <header className="bg-white">
-      <div className="max-w-7xl mx-auto px-4 lg:px-20">
+      <div className="mx-auto px-4 lg:px-32">
         <div className="flex items-center justify-between h-16 lg:h-17">
           {/* Left section - Logo and Navigation */}
           <div className="flex items-center">

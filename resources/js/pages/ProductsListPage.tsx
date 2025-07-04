@@ -108,17 +108,19 @@ export const ProductsListPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen pb-12 bg-gray-50">
       {/* Breadcrumb */}
-      <div className="container mx-auto px-20 py-4">
+      <div className="mx-auto px-32 py-4">
         <div className="flex items-center text-sm">
           <a href="#" className="text-gray-500 hover:text-gray-700">Home</a>
           <span className="mx-2 text-gray-500">/</span>
           <span className="text-gray-900">Casual</span>
         </div>
       </div>
-
-      <div className="container mx-auto px-4 md:px-20">
+      <div className="hidden md:block">
+        <FilterPopup onApplyFilters={setFilters} />
+      </div>
+      <div className="mx-auto px-4 md:px-32">
         {/* Rest of the content */}
         <div className="flex justify-between space-y-6">
           {/* Search and Filter Area */}
@@ -126,12 +128,15 @@ export const ProductsListPage: React.FC = () => {
             <div className="flex flex-col space-y-4">
               {/* Search Bar */}
               <div className="relative">
+              <div className="md:hidden absolute top-1.5 right-14">
+                  <FilterPopup onApplyFilters={setFilters} />
+                </div>
                 <input
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search by product name"
-                  className="w-full h-[46px] pl-10 pr-4 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-gray-200"
+                  className="w-full h-[52px] pl-10 pr-4 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-gray-200"
                 />
                 <svg
                   className="absolute left-3 top-3.5 h-5 w-5 text-gray-400"
@@ -150,14 +155,11 @@ export const ProductsListPage: React.FC = () => {
               </div>
 
               {/* Title and Filter */}
-              <div className="flex justify-between items-center">
+              <div className="flex items-start">
                 <h1 className="text-2xl font-bold">Casual</h1>
-                <div className="flex items-center space-x-4">
-                  <FilterPopup onApplyFilters={setFilters} />
-                </div>
               </div>
             {/* Main products area */}
-<div className="flex-1">
+            <div className="flex-1">
               <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
                 {filteredProducts.map((product) => (
                   <ProductCard

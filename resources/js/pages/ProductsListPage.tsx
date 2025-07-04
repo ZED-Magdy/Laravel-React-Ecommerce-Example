@@ -1,17 +1,9 @@
 import React from 'react';
 import { FilterPopup } from '@/components/ui/filter-popup';
 import { ProductDetails } from '@/components/ui/product-details';
-import { QuantityControls } from '@/components/ui/quantity-controls';
+import { ProductCard } from '@/components/ui/product-card';
 import { OrderSummary } from '@/components/ui/order-summary';
-
-interface Product {
-  id: number;
-  name: string;
-  price: number;
-  image: string;
-  category: string;
-  stock: number;
-}
+import { Product } from '@/types/product';
 
 export const ProductsListPage: React.FC = () => {
   const [selectedProduct, setSelectedProduct] = React.useState<Product | null>(null);
@@ -29,7 +21,7 @@ export const ProductsListPage: React.FC = () => {
       id: 1,
       name: "Gradient Graphic T-shirt",
       price: 145,
-      image: "https://picsum.photos/400/400?random=1",
+      image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=400&fit=crop&auto=format",
       category: "T-shirts",
       stock: 25,
     },
@@ -37,7 +29,7 @@ export const ProductsListPage: React.FC = () => {
       id: 2,
       name: "Polo with Tipping Details",
       price: 180,
-      image: "https://picsum.photos/400/400?random=2",
+      image: "https://images.unsplash.com/photo-1586790170083-2f9ceadc732d?w=400&h=400&fit=crop&auto=format",
       category: "Polo",
       stock: 18,
     },
@@ -45,7 +37,7 @@ export const ProductsListPage: React.FC = () => {
       id: 3,
       name: "Black Striped T-shirt",
       price: 120,
-      image: "https://picsum.photos/400/400?random=3",
+      image: "https://images.unsplash.com/photo-1503341504253-dff4815485f1?w=400&h=400&fit=crop&auto=format",
       category: "T-shirts",
       stock: 30,
     },
@@ -53,7 +45,7 @@ export const ProductsListPage: React.FC = () => {
       id: 4,
       name: "Classic Blue Jeans",
       price: 200,
-      image: "https://picsum.photos/400/400?random=4",
+      image: "https://images.unsplash.com/photo-1542272604-787c3835535d?w=400&h=400&fit=crop&auto=format",
       category: "Jeans",
       stock: 15,
     },
@@ -61,7 +53,7 @@ export const ProductsListPage: React.FC = () => {
       id: 5,
       name: "Plaid Flannel Shirt",
       price: 160,
-      image: "https://picsum.photos/400/400?random=5",
+      image: "https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?w=400&h=400&fit=crop&auto=format",
       category: "Shirts",
       stock: 22,
     },
@@ -69,7 +61,7 @@ export const ProductsListPage: React.FC = () => {
       id: 6,
       name: "Orange Cotton T-shirt",
       price: 110,
-      image: "https://picsum.photos/400/400?random=6",
+      image: "https://images.unsplash.com/photo-1618354691373-d851c5c3a990?w=400&h=400&fit=crop&auto=format",
       category: "T-shirts",
       stock: 28,
     },
@@ -164,52 +156,17 @@ export const ProductsListPage: React.FC = () => {
                   <FilterPopup onApplyFilters={setFilters} />
                 </div>
               </div>
-{/* Main products area */}
+            {/* Main products area */}
 <div className="flex-1">
               <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
                 {filteredProducts.map((product) => (
-                  <div
+                  <ProductCard
                     key={product.id}
-                    className="bg-white border border-gray-100 rounded-lg shadow-sm overflow-hidden hover:shadow-md transition"
-                  >
-                    <div className="relative aspect-square">
-                      <img
-                        src={product.image}
-                        alt={product.name}
-                        className="w-full h-full object-cover"
-                      />
-                      {getQty(product.id) > 0 && (
-                        <span className="absolute top-4 right-4 bg-blue-600 text-white text-sm font-medium rounded-full w-8 h-8 flex items-center justify-center shadow-md">
-                          {getQty(product.id)}
-                        </span>
-                      )}
-                    </div>
-                    <div className="p-4 space-y-3">
-                      <div className="flex justify-between items-start gap-2">
-                        <h3 
-                          className="font-medium text-base line-clamp-2 flex-1 cursor-pointer"
-                          onClick={() => handleProductClick(product)}
-                        >
-                          {product.name}
-                        </h3>
-                        <span className="bg-gray-100 text-xs px-2 py-1 rounded">
-                          {product.category}
-                        </span>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="font-bold text-lg">${product.price}</span>
-                        <span className="text-sm text-gray-500">Stock: {product.stock}</span>
-                      </div>
-                      <div className="border rounded-lg p-[1px]">
-                        <QuantityControls
-                          value={getQty(product.id)}
-                          min={0}
-                          max={product.stock}
-                          onChange={(qty) => updateQuantity(product.id, qty)}
-                        />
-                      </div>
-                    </div>
-                  </div>
+                    product={product}
+                    quantity={getQty(product.id)}
+                    onProductClick={handleProductClick}
+                    onUpdateQuantity={updateQuantity}
+                  />
                 ))}
               </div>
 

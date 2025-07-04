@@ -21,11 +21,11 @@ export const QuantityControls: React.FC<QuantityControlsProps> = ({
   const fontSize = size === 'sm' ? 'text-sm' : 'text-base';
 
   return (
-    <div className="flex items-center">
+    <div className="flex items-center h-9">
       <Button
         variant="ghost"
         size="icon"
-        className={`${btnSize} bg-gray-100 rounded-l-lg hover:bg-gray-200`}
+        className={`${btnSize} bg-gray-100 hover:bg-gray-200 rounded-none border-0 flex-shrink-0`}
         onClick={() => onChange(Math.max(value - 1, min))}
         disabled={value <= min}
       >
@@ -44,13 +44,13 @@ export const QuantityControls: React.FC<QuantityControlsProps> = ({
           <path d="M5 12h14" />
         </svg>
       </Button>
-      <div className={`${inputSize} flex items-center justify-center ${fontSize} font-medium bg-white`}>
+      <div className={`flex-1 h-full flex items-center justify-center ${fontSize} font-medium bg-white border-x border-gray-300 min-w-[40px]`}>
         {value}
       </div>
       <Button
         variant="ghost"
         size="icon"
-        className={`${btnSize} bg-gray-100 rounded-r-lg hover:bg-gray-200`}
+        className={`${btnSize} bg-gray-100 hover:bg-gray-200 rounded-none border-0 flex-shrink-0`}
         onClick={() => onChange(Math.min(value + 1, max))}
         disabled={value >= max}
       >

@@ -262,8 +262,8 @@ paths:
         
         **Filtering Options:**
         - **category_id**: Filter by specific category
-        - **price_min**: Minimum price filter (in cents)
-        - **price_max**: Maximum price filter (in cents)
+        - **price_min**: Minimum price filter
+        - **price_max**: Maximum price filter
         - **search**: Search in product titles
         - **page**: Pagination page number
         
@@ -282,7 +282,7 @@ paths:
           example: 1
         - name: price_min
           in: query
-          description: Minimum price filter in cents (e.g., 1000 = $10.00)
+          description: Minimum price filter
           required: false
           schema:
             type: integer
@@ -290,7 +290,7 @@ paths:
           example: 1000
         - name: price_max
           in: query
-          description: Maximum price filter in cents (e.g., 5000 = $50.00)
+          description: Maximum price filter
           required: false
           schema:
             type: integer

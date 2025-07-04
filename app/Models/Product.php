@@ -1,20 +1,25 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Spatie\Image\Enums\Fit;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
-use Spatie\Image\Enums\Fit;
-use Illuminate\Database\Eloquent\Casts\Attribute;
 
-class Product extends Model implements HasMedia
+final class Product extends Model implements HasMedia
 {
     /** @use HasFactory<\Database\Factories\ProductFactory> */
-    use HasFactory, InteractsWithMedia;
+    use HasFactory;
+
+    use InteractsWithMedia;
 
     protected $fillable = [
         'title',
@@ -23,25 +28,49 @@ class Product extends Model implements HasMedia
         'stock',
     ];
 
-    /** @return BelongsTo<Category, Product> */
+    /**
+     * @return BelongsTo<Category, $this>
+     */
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
     }
 
     public function registerMediaConversions(?Media $media = null): void
-    {   
+    {
         $this
             ->addMediaConversion('thumbnail')
-            ->fit(Fit::Contain, 385, 385)
-            ->nonQueued();
+            ->fit(Fit::Contain, 385, 385);
     }
 
+    /**
+     * @return Attribute<int, int>
+     */
     public function price(): Attribute
     {
         return Attribute::make(
-            get: fn (int $value) => $value / 100,
-            set: fn (int $value) => $value * 100,
+            get: fn (mixed $value): int|float => is_numeric($value) ? (int) $value / 100 : 0,
+            set: fn (mixed $value): int => is_numeric($value) ? (int) $value * 100 : 0,
         );
+    }
+
+    /**
+     * @param  Builder<Product>  $builder
+     * @return Builder<Product>
+     */
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function whereMinPrice(Builder $builder, int $priceMin): Builder
+    {
+        return $builder->where('price', '>=', $priceMin * 100);
+    }
+
+    /**
+     * @param  Builder<Product>  $builder
+     * @return Builder<Product>
+     */
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function whereMaxPrice(Builder $builder, int $priceMax): Builder
+    {
+        return $builder->where('price', '<=', $priceMax * 100);
     }
 }

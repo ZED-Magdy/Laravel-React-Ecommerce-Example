@@ -53,7 +53,7 @@ test('returns only id and title fields', function (): void {
 
     // Assert
     expect($result)->toHaveCount(1);
-    
+
     $category = $result->first();
     expect($category)
         ->toHaveKeys(['id', 'title'])
@@ -84,7 +84,7 @@ test('returns categories in consistent order', function (): void {
     $category1 = Category::factory()->create(['title' => 'First']);
     $category2 = Category::factory()->create(['title' => 'Second']);
     $category3 = Category::factory()->create(['title' => 'Third']);
-    
+
     $action = new GetCategoriesAction();
 
     // Act - Execute multiple times
@@ -102,4 +102,4 @@ test('action can be instantiated without dependencies', function (): void {
 
     // Assert
     expect($action)->toBeInstanceOf(GetCategoriesAction::class);
-}); 
+});

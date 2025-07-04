@@ -83,7 +83,9 @@ test('uses caching for categories', function (): void {
     expect(Cache::has('categories'))->toBeTrue();
 
     // Add a new category directly to database (bypassing cache)
-    $newCategory = Category::factory()->create();
+    $newCategory = Category::factory()->create([
+        'title' => 'New Category',
+    ]);
 
     // Act - Second request should return cached data (without new category)
     $response2 = $this->getJson('/api/categories');
@@ -134,7 +136,7 @@ test('cache expires after one hour', function (): void {
 test('handles database errors gracefully', function (): void {
     // This test would require mocking database failures
     // For now, we'll test that the endpoint exists and works
-    
+
     // Act
     $response = $this->getJson('/api/categories');
 
@@ -229,4 +231,4 @@ test('categories endpoint exists and is routed correctly', function (): void {
 
     // Assert - Should not return 404
     $response->assertStatus(200);
-}); 
+});

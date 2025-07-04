@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Resources;
 
 use App\Models\Product;
@@ -9,7 +11,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
 /**
  * @mixin Product
  */
-class ProductResource extends JsonResource
+final class ProductResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -22,7 +24,7 @@ class ProductResource extends JsonResource
             'id' => $this->id,
             'title' => $this->title,
             'price' => $this->price,
-            'category' => $this->category->title,
+            'category' => $this->category?->title,
             'stock' => $this->stock,
             'thumbnail' => $this->getFirstMediaUrl('thumbnail'),
         ];

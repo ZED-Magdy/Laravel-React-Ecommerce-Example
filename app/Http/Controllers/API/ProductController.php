@@ -1,28 +1,30 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\API;
 
+use App\Actions\Catalog\Products\GetProductsAction;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Catelog\ProductFilterRequest;
-use App\Actions\Catalog\Products\GetProductsAction;
 use App\Http\Resources\ProductResource;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Support\Facades\Cache;
 
-class ProductController extends Controller
+final class ProductController extends Controller
 {
     /**
-     * @param ProductFilterRequest $request
      * @return AnonymousResourceCollection<ProductResource>
      */
-    public function index(ProductFilterRequest $request): AnonymousResourceCollection
+    public function index(ProductFilterRequest $productFilterRequest): AnonymousResourceCollection
     {
-        $filters = $request->validated();
-        $cacheKey = 'products_' . md5(json_encode($filters));
+        /**
+         * @var array{category_id: int|null, price_min: int|null, price_max: int|null, search: string|null, page: int|null} $filters
+         */
+        $filters = $productFilterRequest->validated();
+        $cacheKey = 'products_'.md5((string) json_encode($filters));
 
-        $products = Cache::remember($cacheKey, now()->addHour(), function () use ($filters) {
-            return (new GetProductsAction())->execute($filters);
-        });
+        $products = Cache::remember($cacheKey, now()->addHour(), fn (): \Illuminate\Pagination\LengthAwarePaginator => (new GetProductsAction())->execute($filters));
 
         return ProductResource::collection($products);
     }

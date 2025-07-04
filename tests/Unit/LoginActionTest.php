@@ -6,7 +6,7 @@ use App\Actions\Auth\LoginAction;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 
-test('can login with valid credentials', function () {
+test('can login with valid credentials', function (): void {
     // Arrange
     $user = User::factory()->create([
         'email' => 'test@example.com',
@@ -22,26 +22,26 @@ test('can login with valid credentials', function () {
     expect($result)
         ->toBeArray()
         ->toHaveKeys(['token', 'user']);
-    
+
     expect($result['user'])
         ->toBeInstanceOf(User::class)
         ->email->toBe('test@example.com');
-    
+
     expect($result['token'])
         ->toBeString()
         ->not()->toBeEmpty();
 });
 
-test('throws exception with invalid email', function () {
+test('throws exception with invalid email', function (): void {
     // Arrange
     $loginAction = new LoginAction();
 
     // Act & Assert
-    expect(fn () => $loginAction->execute('nonexistent@example.com', 'password123'))
+    expect(fn (): array => $loginAction->execute('nonexistent@example.com', 'password123'))
         ->toThrow(Exception::class, 'Invalid credentials');
 });
 
-test('throws exception with invalid password', function () {
+test('throws exception with invalid password', function (): void {
     // Arrange
     $user = User::factory()->create([
         'email' => 'test@example.com',
@@ -51,11 +51,11 @@ test('throws exception with invalid password', function () {
     $loginAction = new LoginAction();
 
     // Act & Assert
-    expect(fn () => $loginAction->execute('test@example.com', 'wrongpassword'))
+    expect(fn (): array => $loginAction->execute('test@example.com', 'wrongpassword'))
         ->toThrow(Exception::class, 'Invalid credentials');
 });
 
-test('prevents timing attacks by having consistent execution time', function () {
+test('prevents timing attacks by having consistent execution time', function (): void {
     // Arrange
     $user = User::factory()->create([
         'email' => 'test@example.com',
@@ -68,18 +68,20 @@ test('prevents timing attacks by having consistent execution time', function () 
     $start1 = microtime(true);
     try {
         $loginAction->execute('test@example.com', 'wrongpassword');
-    } catch (Exception $e) {
+    } catch (Exception) {
         // Expected
     }
+
     $duration1 = microtime(true) - $start1;
 
     // Act - Test with non-existent user
     $start2 = microtime(true);
     try {
         $loginAction->execute('nonexistent@example.com', 'password123');
-    } catch (Exception $e) {
+    } catch (Exception) {
         // Expected
     }
+
     $duration2 = microtime(true) - $start2;
 
     // Assert - Both should take approximately the same time (300ms ± 50ms tolerance)
@@ -87,12 +89,12 @@ test('prevents timing attacks by having consistent execution time', function () 
     expect($duration1)->toBeLessThan(0.35);    // At most 350ms
     expect($duration2)->toBeGreaterThan(0.25); // At least 250ms
     expect($duration2)->toBeLessThan(0.35);    // At most 350ms
-    
+
     // The difference should be minimal (within 50ms)
     expect(abs($duration1 - $duration2))->toBeLessThan(0.05);
 });
 
-test('executes within expected timeframe for valid credentials', function () {
+test('executes within expected timeframe for valid credentials', function (): void {
     // Arrange
     $user = User::factory()->create([
         'email' => 'test@example.com',
@@ -112,7 +114,7 @@ test('executes within expected timeframe for valid credentials', function () {
     expect($result)->toBeArray();
 });
 
-test('creates valid sanctum token', function () {
+test('creates valid sanctum token', function (): void {
     // Arrange
     $user = User::factory()->create([
         'email' => 'test@example.com',
@@ -126,8 +128,8 @@ test('creates valid sanctum token', function () {
 
     // Assert - Check that token is valid
     expect($result['token'])->toBeString();
-    
+
     // Verify the token can be used for authentication
     $tokens = $user->tokens()->where('name', 'auth_token')->get();
     expect($tokens)->toHaveCount(1);
-}); 
+});

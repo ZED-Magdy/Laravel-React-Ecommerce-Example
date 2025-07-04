@@ -6,7 +6,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\Sanctum;
 
-test('can get authenticated user data', function () {
+test('can get authenticated user data', function (): void {
     // Arrange
     $user = User::factory()->create([
         'name' => 'John Doe',
@@ -22,39 +22,39 @@ test('can get authenticated user data', function () {
     // Assert
     $response->assertStatus(200)
         ->assertJson([
-            'data' => [
-                'id' => $user->id,
-                'name' => $user->name,
-                'email' => $user->email,
-            ]
+
+            'id' => $user->id,
+            'name' => $user->name,
+            'email' => $user->email,
+
         ]);
 });
 
-test('returns 401 when not authenticated', function () {
+test('returns 401 when not authenticated', function (): void {
     // Act
     $response = $this->getJson('/api/user');
 
     // Assert
     $response->assertStatus(401)
         ->assertJson([
-            'message' => 'Unauthenticated.'
+            'message' => 'Unauthenticated.',
         ]);
 });
 
-test('returns 401 with invalid token', function () {
+test('returns 401 with invalid token', function (): void {
     // Act
     $response = $this->withHeaders([
-        'Authorization' => 'Bearer invalid-token'
+        'Authorization' => 'Bearer invalid-token',
     ])->getJson('/api/user');
 
     // Assert
     $response->assertStatus(401)
         ->assertJson([
-            'message' => 'Unauthenticated.'
+            'message' => 'Unauthenticated.',
         ]);
 });
 
-test('user endpoint requires authentication middleware', function () {
+test('user endpoint requires authentication middleware', function (): void {
     // Arrange
     $user = User::factory()->create();
 
@@ -65,7 +65,7 @@ test('user endpoint requires authentication middleware', function () {
     $response->assertStatus(401);
 });
 
-test('user endpoint returns correct user data structure', function () {
+test('user endpoint returns correct user data structure', function (): void {
     // Arrange
     $user = User::factory()->create([
         'name' => 'Jane Smith',
@@ -80,11 +80,9 @@ test('user endpoint returns correct user data structure', function () {
     // Assert
     $response->assertStatus(200)
         ->assertJsonStructure([
-            'data' => [
-                'id',
-                'name',
-                'email',
-            ]
+            'id',
+            'name',
+            'email',
         ])
         ->assertJsonMissing([
             'password',
@@ -93,7 +91,7 @@ test('user endpoint returns correct user data structure', function () {
         ]);
 });
 
-test('user endpoint works with valid sanctum token', function () {
+test('user endpoint works with valid sanctum token', function (): void {
     // Arrange
     $user = User::factory()->create([
         'name' => 'Test User',
@@ -104,16 +102,16 @@ test('user endpoint works with valid sanctum token', function () {
 
     // Act
     $response = $this->withHeaders([
-        'Authorization' => "Bearer $token"
+        'Authorization' => 'Bearer ' . $token,
     ])->getJson('/api/user');
 
     // Assert
     $response->assertStatus(200)
         ->assertJson([
-            'data' => [
-                'id' => $user->id,
-                'name' => $user->name,
-                'email' => $user->email,
-            ]
+
+            'id' => $user->id,
+            'name' => $user->name,
+            'email' => $user->email,
+
         ]);
-}); 
+});

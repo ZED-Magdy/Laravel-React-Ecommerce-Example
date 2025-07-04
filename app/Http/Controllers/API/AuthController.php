@@ -1,34 +1,33 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\API;
 
 use App\Actions\Auth\LoginAction;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Resources\UserResource;
-use Illuminate\Http\Request;
+use Exception;
+use Illuminate\Http\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 
-class AuthController extends Controller
+final class AuthController extends Controller
 {
-    /**
-     * @param LoginRequest|Request $request
-     * @return JsonResponse
-     */
-    public function login(LoginRequest $request)
+    public function login(LoginRequest $loginRequest): JsonResponse
     {
         try {
             $loginAction = new LoginAction();
             $result = $loginAction->execute(
-                email: $request->str('email')->value(),
-                password: $request->str('password')->value(),
+                email: $loginRequest->string('email')->value(),
+                password: $loginRequest->string('password')->value(),
             );
 
             return response()->json([
                 'token' => $result['token'],
                 'user' => new UserResource($result['user']),
             ], Response::HTTP_OK);
-        } catch (\Exception $e) {
+        } catch (Exception) {
             return response()->json([
                 'message' => 'Invalid credentials',
             ], Response::HTTP_UNAUTHORIZED);

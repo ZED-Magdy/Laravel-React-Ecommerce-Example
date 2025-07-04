@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Hash;
 
 uses(RefreshDatabase::class);
 
-test('can login with valid credentials via API', function () {
+test('can login with valid credentials via API', function (): void {
     // Arrange
     $user = User::factory()->create([
         'email' => 'test@example.com',
@@ -29,20 +29,20 @@ test('can login with valid credentials via API', function () {
                 'id',
                 'name',
                 'email',
-            ]
+            ],
         ]);
-        
+
     // Assert that the user data is correct
     $response->assertJsonFragment([
         'email' => 'test@example.com',
     ]);
-    
+
     // Assert that token is present and not empty
     $token = $response->json('token');
     expect($token)->toBeString()->not()->toBeEmpty();
 });
 
-test('returns 401 with invalid credentials', function () {
+test('returns 401 with invalid credentials', function (): void {
     // Arrange
     $user = User::factory()->create([
         'email' => 'test@example.com',
@@ -62,7 +62,7 @@ test('returns 401 with invalid credentials', function () {
         ]);
 });
 
-test('returns 401 with non-existent user', function () {
+test('returns 401 with non-existent user', function (): void {
     // Act
     $response = $this->postJson('/api/login', [
         'email' => 'nonexistent@example.com',
@@ -76,7 +76,7 @@ test('returns 401 with non-existent user', function () {
         ]);
 });
 
-test('requires email field', function () {
+test('requires email field', function (): void {
     // Act
     $response = $this->postJson('/api/login', [
         'password' => 'password123',
@@ -87,7 +87,7 @@ test('requires email field', function () {
         ->assertJsonValidationErrors(['email']);
 });
 
-test('requires password field', function () {
+test('requires password field', function (): void {
     // Act
     $response = $this->postJson('/api/login', [
         'email' => 'test@example.com',
@@ -98,7 +98,7 @@ test('requires password field', function () {
         ->assertJsonValidationErrors(['password']);
 });
 
-test('requires valid email format', function () {
+test('requires valid email format', function (): void {
     // Act
     $response = $this->postJson('/api/login', [
         'email' => 'invalid-email',
@@ -110,7 +110,7 @@ test('requires valid email format', function () {
         ->assertJsonValidationErrors(['email']);
 });
 
-test('handles empty request body', function () {
+test('handles empty request body', function (): void {
     // Act
     $response = $this->postJson('/api/login', []);
 
@@ -119,7 +119,7 @@ test('handles empty request body', function () {
         ->assertJsonValidationErrors(['email', 'password']);
 });
 
-test('handles malformed JSON', function () {
+test('handles malformed JSON', function (): void {
     // Act
     $response = $this->postJson('/api/login', [], [
         'Content-Type' => 'application/json',
@@ -129,7 +129,7 @@ test('handles malformed JSON', function () {
     $response->assertStatus(422);
 });
 
-test('login timing is consistent for different scenarios', function () {
+test('login timing is consistent for different scenarios', function (): void {
     // Arrange
     $user = User::factory()->create([
         'email' => 'test@example.com',
@@ -161,12 +161,12 @@ test('login timing is consistent for different scenarios', function () {
     expect($duration1)->toBeLessThan(0.35);
     expect($duration2)->toBeGreaterThan(0.25);
     expect($duration2)->toBeLessThan(0.35);
-    
+
     // The difference should be minimal
     expect(abs($duration1 - $duration2))->toBeLessThan(0.05);
 });
 
-test('login endpoint exists and is accessible', function () {
+test('login endpoint exists and is accessible', function (): void {
     // Act
     $response = $this->postJson('/api/login', [
         'email' => 'test@example.com',
@@ -177,7 +177,7 @@ test('login endpoint exists and is accessible', function () {
     $response->assertStatus(401); // 401 because credentials are invalid, not 404
 });
 
-test('handles concurrent requests properly', function () {
+test('handles concurrent requests properly', function (): void {
     // Arrange
     $user = User::factory()->create([
         'email' => 'test@example.com',
@@ -188,7 +188,7 @@ test('handles concurrent requests properly', function () {
     $startTime = microtime(true);
 
     // Act - Make multiple concurrent requests
-    for ($i = 0; $i < 3; $i++) {
+    for ($i = 0; $i < 3; ++$i) {
         $responses[] = $this->postJson('/api/login', [
             'email' => 'test@example.com',
             'password' => 'wrongpassword',
@@ -204,4 +204,4 @@ test('handles concurrent requests properly', function () {
 
     // Total time should be reasonable (not 3x the individual request time)
     expect($endTime - $startTime)->toBeLessThan(1.0); // Should complete in under 1 second
-}); 
+});

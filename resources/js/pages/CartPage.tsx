@@ -69,7 +69,7 @@ export const CartPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Breadcrumb */}
-      <div className="mx-auto px-32 py-4">
+      <div className="mx-auto px-4 md:px-32 py-4">
         <div className="flex items-center text-sm">
           <a href="#" className="text-gray-500 hover:text-gray-700">Home</a>
           <span className="mx-2 text-gray-500">/</span>
@@ -77,13 +77,13 @@ export const CartPage: React.FC = () => {
         </div>
       </div>
 
-      <div className="mx-auto px-32">
+      <div className="mx-auto px-4 md:px-32">
         {/* Page Title */}
         <h1 className="text-4xl font-bold text-black mb-8">Your cart</h1>
 
-        <div className="flex gap-5">
+        <div className="flex flex-col md:flex-row gap-5">
           {/* Cart Items Section */}
-          <div className="flex-1">
+          <div className="w-full md:w-2/3">
             <div className="bg-white border border-gray-100 rounded-2xl p-6 space-y-6">
               {cartItems.map((item) => (
                 <CartItemCard
@@ -97,7 +97,7 @@ export const CartPage: React.FC = () => {
           </div>
 
           {/* Order Summary Section */}
-          <div className="w-[509px]">
+          <div className="w-full md:w-1/3">
             <div className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm">
               {/* Header */}
               <div className="flex justify-between items-center mb-6">
@@ -167,7 +167,7 @@ const CartItemCard: React.FC<CartItemCardProps> = ({ item, onUpdateQuantity, onR
       <div className="flex-1 flex flex-col justify-between">
         {/* Top Section - Name and Category */}
         <div className="space-y-3">
-          <div className="flex justify-start items-start gap-4">
+          <div className="flex flex-col md:flex-row justify-start items-start gap-4">
             <h3 className="font-medium text-base text-black">
               {item.product.name}
             </h3>
@@ -177,14 +177,14 @@ const CartItemCard: React.FC<CartItemCardProps> = ({ item, onUpdateQuantity, onR
           </div>
 
           {/* Price and Stock */}
-          <div className="flex flex-col items-start gap-1">
+          <div className="flex flex-row md:flex-col justify-between md:justify-start md:gap-1">
             <span className="font-bold text-base text-black">${item.product.price}</span>
             <span className="text-sm text-gray-500">Stock: {item.product.stock}</span>
           </div>
         </div>
 
         {/* Bottom Section - Quantity Controls */}
-        <div className="mt-4 w-1/2">
+        <div className="mt-4 w-full md:w-1/2">
           <div className="border border-gray-300 rounded-lg overflow-hidden">
             <QuantityControls
               value={item.quantity}

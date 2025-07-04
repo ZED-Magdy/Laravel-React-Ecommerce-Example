@@ -1,9 +1,27 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { Search, ShoppingCart, Menu, X } from 'lucide-react';
+import { Search, ShoppingCart, Menu, X, User, LogOut, Loader2 } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
 
 export const Navbar: React.FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const { isAuthenticated, user, logout, loading } = useAuth();
+  const userMenuRef = useRef<HTMLDivElement>(null);
+
+  // Close user menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
+        setIsUserMenuOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   return (
     <header className="bg-white">
@@ -43,7 +61,7 @@ export const Navbar: React.FC = () => {
             </nav>
           </div>
 
-          {/* Right section - Search, Cart, Login */}
+          {/* Right section - Search, Cart, Auth */}
           <div className="flex items-center space-x-3 lg:space-x-4">
             {/* Search Icon */}
             <button className="md:hidden p-2 hover:bg-gray-100 rounded">
@@ -55,21 +73,71 @@ export const Navbar: React.FC = () => {
               <ShoppingCart size={20} className="text-black" />
             </Link>
 
-            {/* Login Button */}
-            <Link 
-              to="/login" 
-              className="bg-black text-white px-4 py-2 rounded text-sm font-medium font-roboto hover:bg-gray-800 hidden sm:block"
-            >
-              Login
-            </Link>
+            {/* Authentication Section */}
+            {loading ? (
+              <div className="p-2">
+                <Loader2 size={20} className="animate-spin text-gray-600" />
+              </div>
+            ) : isAuthenticated && user ? (
+              <>
+                {/* Desktop User Menu */}
+                <div className="relative hidden sm:block" ref={userMenuRef}>
+                  <button 
+                    onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                    className="flex items-center space-x-2 p-2 hover:bg-gray-100 rounded"
+                  >
+                    <User size={20} className="text-black" />
+                    <span className="text-sm font-medium text-black">{user.name}</span>
+                  </button>
+                  
+                  {isUserMenuOpen && (
+                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg border border-gray-200 py-1 z-50">
+                      <div className="px-4 py-2 text-sm text-gray-700 border-b border-gray-200">
+                        <p className="font-medium">{user.name}</p>
+                        <p className="text-xs text-gray-500 truncate">{user.email}</p>
+                      </div>
+                      <button 
+                        onClick={() => {
+                          logout();
+                          setIsUserMenuOpen(false);
+                        }}
+                        className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center space-x-2"
+                      >
+                        <LogOut size={16} />
+                        <span>Logout</span>
+                      </button>
+                    </div>
+                  )}
+                </div>
 
-            <Link 
-                to="/login" 
-                className="bg-black text-white px-4 py-2 rounded text-sm font-medium font-roboto hover:bg-gray-800 text-center sm:hidden"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                Login
-              </Link>
+                {/* Mobile User Button */}
+                <button 
+                  onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                  className="sm:hidden p-2 hover:bg-gray-100 rounded"
+                >
+                  <User size={20} className="text-black" />
+                </button>
+              </>
+            ) : (
+              <>
+                {/* Desktop Login Button */}
+                <Link 
+                  to="/login" 
+                  className="bg-black text-white px-4 py-2 rounded text-sm font-medium font-roboto hover:bg-gray-800 hidden sm:block"
+                >
+                  Login
+                </Link>
+
+                {/* Mobile Login Button */}
+                <Link 
+                  to="/login" 
+                  className="bg-black text-white px-4 py-2 rounded text-sm font-medium font-roboto hover:bg-gray-800 text-center sm:hidden"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Login
+                </Link>
+              </>
+            )}
           </div>
         </div>
 
@@ -88,6 +156,33 @@ export const Navbar: React.FC = () => {
                 Sell Your Product
               </button>
               
+              {/* Mobile Auth Section */}
+              {isAuthenticated && user ? (
+                <div className="space-y-3 pt-3 border-t border-gray-200">
+                  <div className="px-2 py-2">
+                    <p className="font-medium text-gray-900">{user.name}</p>
+                    <p className="text-xs text-gray-500">{user.email}</p>
+                  </div>
+                  <button 
+                    onClick={() => {
+                      logout();
+                      setIsMobileMenuOpen(false);
+                    }}
+                    className="w-full text-left px-2 py-2 text-gray-700 hover:bg-gray-100 rounded flex items-center space-x-2"
+                  >
+                    <LogOut size={16} />
+                    <span>Logout</span>
+                  </button>
+                </div>
+              ) : (
+                <Link 
+                  to="/login" 
+                  className="bg-black text-white px-4 py-2 rounded text-sm font-medium font-roboto hover:bg-gray-800 text-center"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Login
+                </Link>
+              )}
             </div>
           </div>
         )}

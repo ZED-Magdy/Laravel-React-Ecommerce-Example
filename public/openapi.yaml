@@ -1,0 +1,341 @@
+openapi: 3.0.3
+info:
+  title: Daftra E-commerce API
+  description: |
+    RESTful API for Daftra E-commerce platform providing authentication and user management endpoints.
+    
+    ## Authentication
+    This API uses Bearer token authentication with Laravel Sanctum. Include the token in the Authorization header:
+    `Authorization: Bearer {token}`
+    
+    ## Security Features
+    - Timing attack prevention on login endpoints
+    - Secure password hashing with bcrypt
+    - Rate limiting on authentication endpoints
+    
+    ## Response Format
+    All responses follow a consistent JSON format with appropriate HTTP status codes.
+  version: 1.0.0
+  contact:
+    name: Daftra API Support
+    email: support@daftra.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: http://localhost:8000/api
+    description: Development server
+  - url: https://api.daftra.com/api
+    description: Production server
+
+security:
+  - bearerAuth: []
+
+paths:
+  /login:
+    post:
+      tags:
+        - Authentication
+      summary: User Login
+      description: |
+        Authenticate a user with email and password credentials.
+        
+        **Security Features:**
+        - Timing attack prevention: All authentication attempts take approximately 300ms
+        - Rate limiting: 5 attempts per minute per IP
+        - Secure password verification with bcrypt
+        
+        **Success Response:**
+        Returns a Bearer token and user information for authenticated access to protected endpoints.
+      operationId: login
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+            examples:
+              valid_credentials:
+                summary: Valid login credentials
+                value:
+                  email: "user@example.com"
+                  password: "password123"
+              invalid_email:
+                summary: Invalid email format
+                value:
+                  email: "invalid-email"
+                  password: "password123"
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+              examples:
+                success:
+                  summary: Successful login
+                  value:
+                    token: "1|dy3hZHSBvfqAhhHm48ar8g2mfnFAb1K1x2a3fSxL884c2a58"
+                    user:
+                      id: 1
+                      name: "John Doe"
+                      email: "user@example.com"
+        '401':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                invalid_credentials:
+                  summary: Invalid email or password
+                  value:
+                    message: "Invalid credentials"
+        '422':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+              examples:
+                missing_email:
+                  summary: Missing email field
+                  value:
+                    message: "The given data was invalid."
+                    errors:
+                      email:
+                        - "The email field is required."
+                missing_password:
+                  summary: Missing password field
+                  value:
+                    message: "The given data was invalid."
+                    errors:
+                      password:
+                        - "The password field is required."
+                invalid_email:
+                  summary: Invalid email format
+                  value:
+                    message: "The given data was invalid."
+                    errors:
+                      email:
+                        - "The email field must be a valid email address."
+        '429':
+          description: Too many requests
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                rate_limit:
+                  summary: Rate limit exceeded
+                  value:
+                    message: "Too many login attempts. Please try again later."
+
+  /user:
+    get:
+      tags:
+        - User
+      summary: Get Authenticated User
+      description: |
+        Retrieve the currently authenticated user's information.
+        
+        **Requirements:**
+        - Valid Bearer token in Authorization header
+        - Active user session
+        
+        **Response:**
+        Returns the authenticated user's profile information.
+      operationId: getAuthenticatedUser
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: User information retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+              examples:
+                success:
+                  summary: Authenticated user details
+                  value:
+                    id: 1
+                    name: "John Doe"
+                    email: "user@example.com"
+        '401':
+          description: Unauthorized - Invalid or missing token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                missing_token:
+                  summary: Missing authorization token
+                  value:
+                    message: "Unauthenticated."
+                invalid_token:
+                  summary: Invalid or expired token
+                  value:
+                    message: "Unauthenticated."
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: |
+        Laravel Sanctum Bearer token authentication.
+        
+        **How to obtain a token:**
+        1. Use the `/login` endpoint with valid credentials
+        2. Include the returned token in the `Authorization` header as `Bearer {token}`
+        
+        **Token format:**
+        `{token_id}|{plain_text_token}`
+        
+        **Example:**
+        `Authorization: Bearer 1|dy3hZHSBvfqAhhHm48ar8g2mfnFAb1K1x2a3fSxL884c2a58`
+
+  schemas:
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          description: User's email address
+          example: "user@example.com"
+          minLength: 5
+          maxLength: 255
+        password:
+          type: string
+          format: password
+          description: User's password
+          example: "password123"
+          minLength: 8
+          maxLength: 255
+      example:
+        email: "user@example.com"
+        password: "password123"
+
+    LoginResponse:
+      type: object
+      required:
+        - token
+        - user
+      properties:
+        token:
+          type: string
+          description: |
+            Bearer token for API authentication. 
+            Format: `{token_id}|{plain_text_token}`
+          example: "1|dy3hZHSBvfqAhhHm48ar8g2mfnFAb1K1x2a3fSxL884c2a58"
+        user:
+          $ref: '#/components/schemas/User'
+      example:
+        token: "1|dy3hZHSBvfqAhhHm48ar8g2mfnFAb1K1x2a3fSxL884c2a58"
+        user:
+          id: 1
+          name: "John Doe"
+          email: "user@example.com"
+
+    User:
+      type: object
+      required:
+        - id
+        - name
+        - email
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: Unique user identifier
+          example: 1
+          minimum: 1
+        name:
+          type: string
+          description: User's full name
+          example: "John Doe"
+          minLength: 1
+          maxLength: 255
+        email:
+          type: string
+          format: email
+          description: User's email address
+          example: "user@example.com"
+          minLength: 5
+          maxLength: 255
+      example:
+        id: 1
+        name: "John Doe"
+        email: "user@example.com"
+
+    ErrorResponse:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
+          description: Human-readable error message
+          example: "Invalid credentials"
+      example:
+        message: "Invalid credentials"
+
+    ValidationErrorResponse:
+      type: object
+      required:
+        - message
+        - errors
+      properties:
+        message:
+          type: string
+          description: General validation error message
+          example: "The given data was invalid."
+        errors:
+          type: object
+          description: Field-specific validation errors
+          additionalProperties:
+            type: array
+            items:
+              type: string
+          example:
+            email:
+              - "The email field is required."
+            password:
+              - "The password field is required."
+      example:
+        message: "The given data was invalid."
+        errors:
+          email:
+            - "The email field is required."
+          password:
+            - "The password field is required."
+
+tags:
+  - name: Authentication
+    description: |
+      User authentication endpoints for login and logout operations.
+      
+      **Security Features:**
+      - Timing attack prevention
+      - Rate limiting
+      - Secure password hashing
+      
+  - name: User
+    description: |
+      User profile and management endpoints.
+      
+      **Authentication Required:**
+      All endpoints in this section require Bearer token authentication.
+
+externalDocs:
+  description: Find more info about Daftra E-commerce API
+  url: https://docs.daftra.com/api 

@@ -26,7 +26,7 @@ test('it returns paginated products successfully', function () {
                     'id',
                     'title',
                     'price',
-                    'category_id',
+                    'category',
                     'stock',
                     'thumbnail',
                 ]
@@ -77,7 +77,7 @@ test('it filters products by category_id', function () {
     expect($response->json('meta.total'))->toBe(3);
     
     foreach ($response->json('data') as $product) {
-        expect($product['category_id'])->toBe($category1->id);
+        expect($product['category'])->toBe($category1->title);
     }
 });
 
@@ -174,7 +174,7 @@ test('it combines multiple filters correctly', function () {
     
     $product = $response->json('data.0');
     expect($product['title'])->toBe('Phone Charger');
-    expect($product['category_id'])->toBe($category1->id);
+    expect($product['category'])->toBe($category1->title);
     expect($product['price'])->toBe(15);
 });
 
@@ -288,7 +288,7 @@ test('it includes correct product resource fields', function () {
         'id',
         'title',
         'price',
-        'category_id',
+        'category',
         'stock',
         'thumbnail',
     ]);
@@ -296,7 +296,7 @@ test('it includes correct product resource fields', function () {
     expect($productData['id'])->toBe($product->id);
     expect($productData['title'])->toBe($product->title);
     expect($productData['price'])->toBe($product->price);
-    expect($productData['category_id'])->toBe($product->category_id);
+    expect($productData['category'])->toBe($product->category->title);
     expect($productData['stock'])->toBe($product->stock);
 });
 
@@ -381,7 +381,7 @@ test('it returns consistent response structure across different filters', functi
                         'id',
                         'title',
                         'price',
-                        'category_id',
+                        'category',
                         'stock',
                         'thumbnail',
                     ]

@@ -28,6 +28,9 @@ final class GetProductsAction
             ->when($filters['search'], function ($query, $search) {
                 $query->where('title', 'like', '%' . $search . '%');
             })
+            ->with(['category' => function ($query) {
+                $query->select('id', 'title');
+            }])
             ->orderBy('price', 'asc')
             ->paginate(6, ['*'], 'page', $filters['page'] ?? 1);
     }

@@ -172,9 +172,9 @@ test('it combines multiple filters', function () {
 
 test('it orders products by price ascending', function () {
     $category = Category::factory()->create();
-    Product::factory()->create(['price' => 15, 'category_id' => $category->id]); // $15.00 (1500 cents)
-    Product::factory()->create(['price' => 5, 'category_id' => $category->id]); // $5.00 (500 cents)
-    Product::factory()->create(['price' => 10, 'category_id' => $category->id]); // $10.00 (1000 cents)
+    Product::factory()->create(['price' => 15, 'category_id' => $category->id]);
+    Product::factory()->create(['price' => 5, 'category_id' => $category->id]);
+    Product::factory()->create(['price' => 10, 'category_id' => $category->id]);
 
     $result = $this->action->execute([
         'category_id' => null,
@@ -214,7 +214,7 @@ test('it handles pagination correctly', function () {
     ]);
 
     expect($result->total())->toBe(25);
-    expect($result->perPage())->toBe(15); // Default Laravel pagination
+    expect($result->perPage())->toBe(6);
     expect($result->currentPage())->toBe(1);
     expect($result->hasPages())->toBe(true);
     expect($result->hasMorePages())->toBe(true);

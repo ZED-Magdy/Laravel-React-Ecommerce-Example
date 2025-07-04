@@ -272,7 +272,7 @@ test('it supports pagination with page parameter', function () {
     $response->assertOk();
     expect($response->json('meta.current_page'))->toBe(2);
     expect($response->json('meta.total'))->toBe(20);
-    expect($response->json('data'))->toHaveCount(5); // Remaining items on page 2
+    expect($response->json('data'))->toHaveCount(6);
 });
 
 test('it includes correct product resource fields', function () {

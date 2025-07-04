@@ -19,6 +19,7 @@ class ProductFilterRequest extends FormRequest
             'price_min' => 'nullable|integer|min:0',
             'price_max' => 'nullable|integer|min:1',
             'search' => 'nullable|string|max:255',
+            'page' => 'nullable|integer|min:1',
         ];
     }
 

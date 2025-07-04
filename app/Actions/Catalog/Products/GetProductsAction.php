@@ -10,7 +10,7 @@ use Illuminate\Pagination\LengthAwarePaginator;
 final class GetProductsAction
 {
     /**
-     * @param array{category_id: int, price_min: int, price_max: int, search: string} $filters
+     * @param array{category_id: int, price_min: int, price_max: int, search: string, page: int} $filters
      * @return LengthAwarePaginator<Product>
      */
     public function execute(array $filters): LengthAwarePaginator
@@ -29,6 +29,6 @@ final class GetProductsAction
                 $query->where('title', 'like', '%' . $search . '%');
             })
             ->orderBy('price', 'asc')
-            ->paginate();
+            ->paginate(6, ['*'], 'page', $filters['page'] ?? 1);
     }
 }

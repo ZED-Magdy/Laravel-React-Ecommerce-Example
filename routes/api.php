@@ -1,14 +1,13 @@
 <?php
+
+declare(strict_types=1);
+
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
+Route::middleware('auth:sanctum')->get('/user', fn (Request $request) => $request->user());
 
 // Test route
-Route::get('/hello', function () {
-    return response()->json([
-        'message' => 'Hello from Laravel!'
-    ]);
-}); 
+Route::get('/hello', fn () => response()->json([
+    'message' => 'Hello from Laravel!',
+]));

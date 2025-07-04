@@ -1,10 +1,16 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Providers;
 
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
 
-class AppServiceProvider extends ServiceProvider
+final class AppServiceProvider extends ServiceProvider
 {
     /**
      * Register any application services.
@@ -19,6 +25,33 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        Vite::prefetch(concurrency: 3);
+        $this->setupModelsConfig();
+        $this->setupCommands();
+        $this->configureUrls();
+        $this->configureFilamentPlugins();
     }
+
+    private function setupModelsConfig(): void
+    {
+        Model::shouldBeStrict(
+            ! $this->app->environment('production'),
+        );
+    }
+
+    private function setupCommands(): void
+    {
+        DB::prohibitDestructiveCommands(
+            $this->app->environment('production'),
+        );
+    }
+
+    private function configureUrls(): void
+    {
+        if ($this->app->environment('production')) {
+            URL::forceScheme('https');
+        }
+    }
+
+    private function configureFilamentPlugins(): void {}
 }

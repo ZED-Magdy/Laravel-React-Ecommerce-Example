@@ -46,10 +46,65 @@ export interface Category {
 }
 
 /**
+ * Products API interface
+ */
+export interface ApiProduct {
+  id: number;
+  title: string;
+  price: number;
+  category: string;
+  stock: number;
+  thumbnail: string | null;
+}
+
+export interface ProductsResponse {
+  data: ApiProduct[];
+  links: {
+    first: string;
+    last: string | null;
+    prev: string | null;
+    next: string | null;
+  };
+  meta: {
+    current_page: number;
+    from: number | null;
+    last_page: number;
+    per_page: number;
+    to: number | null;
+    total: number;
+  };
+}
+
+export interface ProductFilters {
+  category_id?: number;
+  price_min?: number;
+  price_max?: number;
+  search?: string;
+  page?: number;
+}
+
+/**
  * Fetch all categories from the API
  */
 export async function getCategories(): Promise<Category[]> {
   return apiRequest<Category[]>('/categories');
+}
+
+/**
+ * Fetch products from the API with filtering and pagination
+ */
+export async function getProducts(filters: ProductFilters = {}): Promise<ProductsResponse> {
+  const searchParams = new URLSearchParams();
+  
+  // Add non-empty filters to search params
+  Object.entries(filters).forEach(([key, value]) => {
+    if (value !== undefined && value !== null && value !== '') {
+      searchParams.append(key, value.toString());
+    }
+  });
+
+  const endpoint = `/products${searchParams.toString() ? `?${searchParams.toString()}` : ''}`;
+  return apiRequest<ProductsResponse>(endpoint);
 }
 
 /**
@@ -65,4 +120,20 @@ export function transformCategoriesForFilter(categories: Category[]) {
   ];
   
   return transformedCategories;
+}
+
+/**
+ * Transform API product data to component format
+ */
+export function transformProductsForComponent(apiProducts: ApiProduct[]): any[] {
+  return apiProducts.map(product => {
+    return {
+      id: product.id,
+      name: product.title,
+      price: product.price,
+      image: product.thumbnail || 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=400&fit=crop&auto=format',
+      category: product.category || 'Unknown',
+      stock: product.stock,
+    };
+  });
 } 

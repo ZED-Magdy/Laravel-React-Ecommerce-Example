@@ -8,12 +8,28 @@ import { Loader2, AlertCircle } from "lucide-react";
 
 interface FilterPopupProps {
   onApplyFilters: (filters: any) => void;
+  onClearFilters: () => void;
+  initialFilters?: {
+    priceRange?: number;
+    categories?: string[];
+  };
 }
 
-export const FilterPopup: React.FC<FilterPopupProps> = ({ onApplyFilters }) => {
-  const [priceRange, setPriceRange] = React.useState([0]);
-  const [selectedCategories, setSelectedCategories] = React.useState<string[]>([]);
+export const FilterPopup: React.FC<FilterPopupProps> = ({ 
+  onApplyFilters, 
+  onClearFilters, 
+  initialFilters 
+}) => {
+  const [isOpen, setIsOpen] = React.useState(false);
+  const [priceRange, setPriceRange] = React.useState([initialFilters?.priceRange || 0]);
+  const [selectedCategories, setSelectedCategories] = React.useState<string[]>(initialFilters?.categories || []);
   const { categories, loading: categoriesLoading, error: categoriesError, refetch } = useCategories();
+
+  // Update internal state when initial filters change
+  React.useEffect(() => {
+    setPriceRange([initialFilters?.priceRange || 0]);
+    setSelectedCategories(initialFilters?.categories || []);
+  }, [initialFilters]);
 
   const handleCategoryChange = (category: string, checked: boolean) => {
     setSelectedCategories(prev => {
@@ -34,10 +50,18 @@ export const FilterPopup: React.FC<FilterPopupProps> = ({ onApplyFilters }) => {
       priceRange: priceRange[0],
       categories: selectedCategories,
     });
+    setIsOpen(false);
+  };
+
+  const handleClearFilters = () => {
+    setPriceRange([0]);
+    setSelectedCategories([]);
+    onClearFilters();
+    setIsOpen(false);
   };
 
   return (
-    <Sheet>
+    <Sheet open={isOpen} onOpenChange={setIsOpen}>
       <SheetTrigger asChild>
         <button className="p-2 hover:bg-gray-100 rounded-full md:rounded-lg absolute bg-gray-100 md:bg-white px-2 py-2 md:px-6 md:py-6">
         <svg className='w-6 h-6 md:w-12 md:h-12' viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -135,10 +159,7 @@ export const FilterPopup: React.FC<FilterPopupProps> = ({ onApplyFilters }) => {
             <Button 
               variant="outline" 
               className="w-full h-12 text-base font-medium" 
-              onClick={() => {
-                setPriceRange([0]);
-                setSelectedCategories([]);
-              }}
+              onClick={handleClearFilters}
             >
               Clear all filters
             </Button>

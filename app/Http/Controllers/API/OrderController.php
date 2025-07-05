@@ -39,14 +39,14 @@ final class OrderController extends Controller
     /**
      * Get the order details.
      */
-    public function getOrderDetails(Request $request, int $orderId): JsonResponse
+    public function getOrderDetails(Request $request, string $orderId): JsonResponse
     {
         /** @var \App\Models\User $user */
         $user = $request->user();
         $order = Cache::remember(
             'order_'.$orderId.'_'.$user->id,
             now()->addHour(),
-            fn (): Order => (new GetOrderDetailsAction())->execute($orderId, $user->id)
+            fn (): Order => (new GetOrderDetailsAction())->execute((int) $orderId, (int) $user->id)
         );
 
         return response()->json($order, Response::HTTP_OK);
@@ -62,7 +62,7 @@ final class OrderController extends Controller
         $orders = Cache::remember(
             'orders_'.$user->id,
              now()->addHour(), 
-             fn (): LengthAwarePaginator => $getOrdersListAction->execute($user->id)
+             fn (): LengthAwarePaginator => $getOrdersListAction->execute((int) $user->id)
         );
 
         return OrderResource::collection($orders);
@@ -78,7 +78,7 @@ final class OrderController extends Controller
         $orderNumber = Cache::remember(
             'next_order_number_'.$user->id,
             now()->addHour(),
-            fn (): int => $getNextOrderNumberAction->execute($user->id)
+            fn (): int => $getNextOrderNumberAction->execute((int) $user->id)
         );
         return response()->json([
             'order_number' => $orderNumber,

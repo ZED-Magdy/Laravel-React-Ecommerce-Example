@@ -28,4 +28,6 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::get('/orders/{orderId}', [OrderController::class, 'getOrderDetails'])->name('orders.show');
 
     Route::get('/orders', [OrderController::class, 'getOrdersList'])->name('orders.index');
+
+    Route::get('/next-order-number', [OrderController::class, 'getNextOrderNumber'])->name('orders.next-order-number');
 });

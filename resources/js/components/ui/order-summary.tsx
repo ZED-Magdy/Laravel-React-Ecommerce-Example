@@ -1,7 +1,9 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { QuantityControls } from "@/components/ui/quantity-controls";
 import { useNavigate } from 'react-router-dom';
+import { getNextOrderNumber } from '@/lib/api';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface Product {
   id: number;
@@ -25,6 +27,9 @@ export const OrderSummary: React.FC<OrderSummaryProps> = ({
   onUpdateQuantity,
   onRemoveItem,
 }) => {
+  const [nextOrderNumber, setNextOrderNumber] = useState<number | null>(null);
+  const [isLoadingNumber, setIsLoadingNumber] = useState(false);
+  const { isAuthenticated } = useAuth();
   const items = products.filter((p) => cart[p.id] && cart[p.id] > 0);
   const subtotal = items.reduce((sum, p) => sum + p.price * cart[p.id], 0);
   const shipping = items.length ? 15 : 0;
@@ -32,9 +37,64 @@ export const OrderSummary: React.FC<OrderSummaryProps> = ({
   const total = subtotal + shipping + tax;
   const navigate = useNavigate();
 
+  useEffect(() => {
+    let isMounted = true;
+
+    const fetchNextOrderNumber = async () => {
+      if (!isAuthenticated || items.length === 0) {
+        setNextOrderNumber(null);
+        return;
+      }
+
+      setIsLoadingNumber(true);
+      try {
+        const response = await getNextOrderNumber();
+        if (isMounted) {
+          setNextOrderNumber(response.order_number);
+        }
+      } catch (error) {
+        console.error('Failed to fetch next order number:', error);
+        if (isMounted) {
+          setNextOrderNumber(null);
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoadingNumber(false);
+        }
+      }
+    };
+
+    fetchNextOrderNumber();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [isAuthenticated, items.length]);
+
+  const handleProceedClick = () => {
+    if (!isAuthenticated) {
+      // Redirect to login with return URL
+      navigate('/login?redirect=' + encodeURIComponent(window.location.pathname));
+    } else {
+      navigate('/cart');
+    }
+  };
+
   return (
     <div className="space-y-6">
-      <h2 className="text-xl font-bold">Order Summary</h2>
+      <div className="flex justify-between items-center">
+        <h2 className="text-xl font-bold">Order Summary
+        {isAuthenticated && !isLoadingNumber && nextOrderNumber && (
+            <span> (#{nextOrderNumber})</span>
+        )}
+        </h2>
+        {isAuthenticated && isLoadingNumber && (
+          <span className="text-sm text-gray-400">
+            Loading...
+          </span>
+        )}
+      </div>
+
       {/* Cart Items */}
       <div className="space-y-4 max-h-[400px] overflow-y-auto">
         {items.map((item) => (
@@ -88,32 +148,47 @@ export const OrderSummary: React.FC<OrderSummaryProps> = ({
       </div>
 
       {/* Summary */}
-      <div className="space-y-3 text-sm">
-        <div className="flex justify-between">
-          <span className="text-gray-600">Subtotal</span>
-          <span className="font-medium">${subtotal.toFixed(2)}</span>
+      {items.length > 0 && (
+        <div className="space-y-3 text-sm">
+          <div className="flex justify-between">
+            <span className="text-gray-600">Subtotal</span>
+            <span className="font-medium">${subtotal.toFixed(2)}</span>
+          </div>
+          {isAuthenticated && (
+            <>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Shipping</span>
+                <span className="font-medium">${shipping.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Tax</span>
+                <span className="font-medium">${tax.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between text-lg font-semibold pt-3 border-t">
+                <span>Total</span>
+                <span>${total.toFixed(2)}</span>
+              </div>
+            </>
+          )}
         </div>
-        <div className="flex justify-between">
-          <span className="text-gray-600">Shipping</span>
-          <span className="font-medium">${shipping.toFixed(2)}</span>
-        </div>
-        <div className="flex justify-between">
-          <span className="text-gray-600">Tax</span>
-          <span className="font-medium">${tax.toFixed(2)}</span>
-        </div>
-        <div className="flex justify-between text-lg font-semibold pt-3 border-t">
-          <span>Total</span>
-          <span>${total.toFixed(2)}</span>
-        </div>
-      </div>
+      )}
 
-      <Button 
-        className="w-full h-12 text-base"
-        onClick={() => navigate('/cart')}
-        disabled={items.length === 0}
-      >
-        Proceed to Checkout
-      </Button>
+      {/* Action Button */}
+      {items.length > 0 && (
+        <Button 
+          className="w-full h-12 text-base"
+          onClick={handleProceedClick}
+        >
+          {isAuthenticated ? 'Proceed to Checkout' : 'Login to Checkout'}
+        </Button>
+      )}
+
+      {/* Guest Message */}
+      {!isAuthenticated && items.length > 0 && (
+        <p className="text-sm text-gray-500 text-center">
+          Please login to see final price with shipping and tax
+        </p>
+      )}
     </div>
   );
 }; 

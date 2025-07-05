@@ -1,4 +1,5 @@
 const API_BASE_URL = '/api';
+import { authFetch } from '@/lib/auth';
 
 /**
  * Generic API request function
@@ -33,6 +34,27 @@ async function apiRequest<T>(endpoint: string, options: RequestInit = {}): Promi
     return data;
   } catch (error) {
     console.error('API request failed:', error);
+    throw error;
+  }
+}
+
+/**
+ * Generic authenticated API request function
+ */
+async function authenticatedApiRequest<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
+  const url = `${API_BASE_URL}${endpoint}`;
+  
+  try {
+    const response = await authFetch(url, options);
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Authenticated API request failed:', error);
     throw error;
   }
 }
@@ -82,6 +104,20 @@ export interface ProductFilters {
   price_max?: number;
   search?: string;
   page?: number;
+}
+
+/**
+ * Next order number API interface
+ */
+export interface NextOrderNumberResponse {
+  order_number: number;
+}
+
+/**
+ * Fetch the next order number for the authenticated user
+ */
+export async function getNextOrderNumber(): Promise<NextOrderNumberResponse> {
+  return authenticatedApiRequest<NextOrderNumberResponse>('/next-order-number');
 }
 
 /**

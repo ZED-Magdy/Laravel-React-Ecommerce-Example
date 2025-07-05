@@ -40,8 +40,13 @@ export const FilterPopup: React.FC<FilterPopupProps> = ({
     }
   }, [initialFilters, apiPriceRange]);
 
+  // Initialize selectedCategories
   React.useEffect(() => {
-    setSelectedCategories(initialFilters?.categories || []);
+    if (!initialFilters?.categories || initialFilters.categories.length === 0) {
+      setSelectedCategories(['all']);
+    } else {
+      setSelectedCategories(initialFilters.categories);
+    }
   }, [initialFilters]);
 
   const handleCategoryChange = (category: string, checked: boolean) => {
@@ -59,10 +64,14 @@ export const FilterPopup: React.FC<FilterPopupProps> = ({
   };
 
   const handleApplyFilter = () => {
+    let categoriesToApply = selectedCategories;
+    if (selectedCategories.length === 1 && selectedCategories[0] === 'all') {
+      categoriesToApply = [];
+    }
     onApplyFilters({
       priceMin: priceRange[0] === apiPriceRange.min_price ? undefined : priceRange[0],
       priceMax: priceRange[1] === apiPriceRange.max_price ? undefined : priceRange[1],
-      categories: selectedCategories,
+      categories: categoriesToApply,
     });
     setIsOpen(false);
   };

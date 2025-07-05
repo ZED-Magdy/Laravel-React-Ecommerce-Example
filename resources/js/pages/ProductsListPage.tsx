@@ -184,6 +184,8 @@ export const ProductsListPage: React.FC = () => {
     // Add categories filter
     if (newFilters.categories.length > 0 && !newFilters.categories.includes('all')) {
       urlParams.categories = newFilters.categories;
+    } else {
+      urlParams.categories = undefined; // Remove categories param if empty or 'all'
     }
     
     setParams(urlParams);

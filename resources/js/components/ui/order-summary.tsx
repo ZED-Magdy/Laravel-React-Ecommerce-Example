@@ -1,6 +1,7 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { QuantityControls } from "@/components/ui/quantity-controls";
+import { useNavigate } from 'react-router-dom';
 
 interface Product {
   id: number;
@@ -29,11 +30,11 @@ export const OrderSummary: React.FC<OrderSummaryProps> = ({
   const shipping = items.length ? 15 : 0;
   const tax = items.length ? 12.5 : 0;
   const total = subtotal + shipping + tax;
+  const navigate = useNavigate();
 
   return (
     <div className="space-y-6">
       <h2 className="text-xl font-bold">Order Summary</h2>
-      
       {/* Cart Items */}
       <div className="space-y-4 max-h-[400px] overflow-y-auto">
         {items.map((item) => (
@@ -106,7 +107,11 @@ export const OrderSummary: React.FC<OrderSummaryProps> = ({
         </div>
       </div>
 
-      <Button className="w-full h-12 text-base">
+      <Button 
+        className="w-full h-12 text-base"
+        onClick={() => navigate('/cart')}
+        disabled={items.length === 0}
+      >
         Proceed to Checkout
       </Button>
     </div>

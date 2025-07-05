@@ -9,12 +9,12 @@ use Illuminate\Support\Facades\DB;
 final class GetMinMaxProductsPriceAction
 {
     /**
-     * @return array{min_price: int, max_price: int}
+     * @return array{min_price: int|float, max_price: int|float}
      */
     public function execute(): array
     {
         /**
-         * @var object{min_price: int|null, max_price: int|null} $prices
+         * @var object{min_price: int|float|null, max_price: int|null} $prices
          */
         $prices = DB::table('products')
             ->select(DB::raw('MIN(price) as min_price'), DB::raw('MAX(price) as max_price'))

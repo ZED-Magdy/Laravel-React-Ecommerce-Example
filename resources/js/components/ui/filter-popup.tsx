@@ -126,27 +126,27 @@ export const FilterPopup: React.FC<FilterPopupProps> = ({
                   </div>
                 ) : (
                   <>
-                    <Slider
+                <Slider
                       value={priceRange}
                       min={apiPriceRange.min_price}
                       max={apiPriceRange.max_price}
-                      step={1}
+                  step={1}
                       onValueChange={(value) => setPriceRange([value[0], value[1]])}
-                      className="w-full"
-                    />
-                    <div className="flex justify-between items-center text-sm">
-                      <div className="flex items-center gap-2">
-                        <span className="text-gray-500">$</span>
-                        <span className="font-medium">{priceRange[0]}</span>
-                      </div>
+                  className="w-full"
+                />
+                <div className="flex justify-between items-center text-sm">
+                  <div className="flex items-center gap-2">
+                    <span className="text-gray-500">$</span>
+                    <span className="font-medium">{priceRange[0]}</span>
+                  </div>
                       <div className="flex items-center gap-2">
                         <span className="text-gray-500">to</span>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-gray-500">$</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-gray-500">$</span>
                         <span className="font-medium">{priceRange[1]}</span>
-                      </div>
-                    </div>
+                  </div>
+                </div>
                     <div className="flex justify-between items-center text-xs text-gray-400">
                       <span>${apiPriceRange.min_price}</span>
                       <span>${apiPriceRange.max_price}</span>

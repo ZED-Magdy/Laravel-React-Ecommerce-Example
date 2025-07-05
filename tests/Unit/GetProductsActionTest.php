@@ -5,9 +5,7 @@ declare(strict_types=1);
 use App\Actions\Catalog\Products\GetProductsAction;
 use App\Models\Category;
 use App\Models\Product;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Pagination\LengthAwarePaginator;
-
 
 beforeEach(function (): void {
     $this->action = new GetProductsAction();

@@ -5,8 +5,6 @@ declare(strict_types=1);
 use App\Actions\Catalog\Products\GetMinMaxProductsPriceAction;
 use App\Models\Category;
 use App\Models\Product;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-
 
 beforeEach(function (): void {
     $this->action = new GetMinMaxProductsPriceAction();
@@ -78,7 +76,7 @@ test('it returns correct types for min and max prices', function (): void {
 test('it finds correct min and max with many products', function (): void {
     $category = Category::factory()->create();
     $prices = [1, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 100, 200, 300, 500];
-    
+
     foreach ($prices as $price) {
         Product::factory()->create(['price' => $price, 'category_id' => $category->id]);
     }
@@ -89,4 +87,4 @@ test('it finds correct min and max with many products', function (): void {
     expect($result)->toHaveKeys(['min_price', 'max_price']);
     expect($result['min_price'])->toBe(1);
     expect($result['max_price'])->toBe(500);
-}); 
+});

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\API\CategoryController;
+use App\Http\Controllers\API\OrderController;
 use App\Http\Controllers\API\ProductController;
 use App\Http\Resources\UserResource;
 use Illuminate\Http\Request;
@@ -20,3 +21,11 @@ Route::get('/categories', [CategoryController::class, 'index'])->name('categorie
 Route::get('/products', [ProductController::class, 'index'])->name('products.index');
 
 Route::get('/products/min-max-price', [ProductController::class, 'getMinMaxProductsPrice'])->name('products.min-max-price');
+Route::group(['middleware' => 'auth:sanctum'], function () {
+
+    Route::post('/checkout', [OrderController::class, 'checkout'])->name('checkout');
+
+    Route::get('/orders/{orderId}', [OrderController::class, 'getOrderDetails'])->name('orders.show');
+
+    Route::get('/orders', [OrderController::class, 'getOrdersList'])->name('orders.index');
+});

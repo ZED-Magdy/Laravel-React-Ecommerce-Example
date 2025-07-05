@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -52,5 +51,12 @@ final class Product extends Model implements HasMedia
             get: fn (mixed $value): int|float => is_numeric($value) ? (int) $value / 100 : 0,
             set: fn (mixed $value): int => is_numeric($value) ? (int) $value * 100 : 0,
         );
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'price' => 'integer',
+        ];
     }
 }

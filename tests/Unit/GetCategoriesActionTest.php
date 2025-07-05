@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 use App\Actions\Catalog\Categories\GetCategoriesAction;
 use App\Models\Category;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-
 
 test('can retrieve all categories', function (): void {
     // Arrange

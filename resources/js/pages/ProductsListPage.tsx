@@ -246,34 +246,34 @@ export const ProductsListPage: React.FC = () => {
             <div className="flex flex-col space-y-4">
               {/* Search Bar */}
               <div className="relative">
-                <div className="md:hidden absolute top-1.5 right-14">
+              <div className="md:hidden absolute top-1.5 right-14">
                   <FilterPopup 
                     onApplyFilters={handleApplyFilters}
                     onClearFilters={handleClearFilters}
                     initialFilters={filters}
                   />
                 </div>
-                                                    <input
-                    type="text"
+                <input
+                  type="text"
                     value={searchInputValue}
                     onChange={handleSearchChange}
-                    placeholder="Search by product name"
+                  placeholder="Search by product name"
                     className="w-full h-[52px] pl-10 pr-12 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-gray-200"
+                />
+                <svg
+                  className="absolute left-3 top-3.5 h-5 w-5 text-gray-400"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 20 20"
+                  fill="none"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
                   />
-                  <svg
-                    className="absolute left-3 top-3.5 h-5 w-5 text-gray-400"
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 20 20"
-                    fill="none"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                    />
-                  </svg>
+                </svg>
                   {isSearching && (
                     <div className="absolute right-3 top-3.5">
                       <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-500"></div>
@@ -286,9 +286,9 @@ export const ProductsListPage: React.FC = () => {
                 <h1 className="text-2xl font-bold">Casual</h1>
               </div>
 
-              {/* Main products area */}
+            {/* Main products area */}
               <div className="flex-1 relative">
-                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
                   {/* Show skeletons when loading initial data */}
                   {loading && products.length === 0 && (
                     <>
@@ -300,13 +300,13 @@ export const ProductsListPage: React.FC = () => {
 
                   {/* Show products */}
                   {products.map((product) => (
-                    <ProductCard
-                      key={product.id}
-                      product={product}
-                      onProductClick={handleProductClick}
-                    />
-                  ))}
-                </div>
+                  <ProductCard
+                    key={product.id}
+                    product={product}
+                    onProductClick={handleProductClick}
+                  />
+                ))}
+              </div>
 
                 {/* Loading overlay for pagination (when products exist) */}
                 {loading && products.length > 0 && (
@@ -325,8 +325,8 @@ export const ProductsListPage: React.FC = () => {
                   </div>
                 )}
 
-                {/* Pagination */}
-                <div className="flex justify-between items-center mt-8">
+              {/* Pagination */}
+              <div className="flex justify-between items-center mt-8">
                   <button 
                     onClick={handlePrevPage}
                     disabled={!pagination.hasPrev || loading}
@@ -336,24 +336,24 @@ export const ProductsListPage: React.FC = () => {
                         : 'text-gray-400 cursor-not-allowed'
                     }`}
                   >
-                    <svg
-                      className="h-4 w-4 mr-2"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <path d="M15 18l-6-6 6-6" />
-                    </svg>
-                    Previous
-                  </button>
-                  <div className="flex items-center space-x-2">
+                  <svg
+                    className="h-4 w-4 mr-2"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M15 18l-6-6 6-6" />
+                  </svg>
+                  Previous
+                </button>
+                <div className="flex items-center space-x-2">
                     <span className="text-sm text-gray-500">
                       Page {pagination.currentPage} of {pagination.totalPages}
                     </span>
-                  </div>
+                </div>
                   <button 
                     onClick={handleNextPage}
                     disabled={!pagination.hasNext || loading}
@@ -363,21 +363,21 @@ export const ProductsListPage: React.FC = () => {
                         : 'text-gray-400 cursor-not-allowed'
                     }`}
                   >
-                    Next
-                    <svg
-                      className="h-4 w-4 ml-2"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <path d="M9 18l6-6-6-6" />
-                    </svg>
-                  </button>
-                </div>
+                  Next
+                  <svg
+                    className="h-4 w-4 ml-2"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M9 18l6-6-6-6" />
+                  </svg>
+                </button>
               </div>
+            </div>
               
               {/* Results Count */}
               <div className="text-sm text-gray-500">
@@ -388,15 +388,15 @@ export const ProductsListPage: React.FC = () => {
           
           {/* Order Summary */}
           <div className="hidden lg:block w-1/4">
-            <div className="bg-white rounded-lg shadow-sm p-6">
-              <OrderSummary
+              <div className="bg-white rounded-lg shadow-sm p-6">
+                <OrderSummary
                 cart={Object.fromEntries(cartItems.map(item => [item.product.id, item.quantity]))}
                 products={cartItems.map(item => item.product)}
-                onUpdateQuantity={updateQuantity}
+                  onUpdateQuantity={updateQuantity}
                 onRemoveItem={removeItem}
-              />
+                />
+              </div>
             </div>
-          </div>
         </div>
 
         <ProductDetails

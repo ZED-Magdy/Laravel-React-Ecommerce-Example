@@ -12,20 +12,20 @@ export const App = () => {
   return (
     <AuthProvider>
       <CartProvider>
-        <BrowserRouter>
-          <Layout>
-            <Routes>
+      <BrowserRouter>
+        <Layout>
+          <Routes>
               <Route path="/" element={
                 <CategoriesProvider>
                   <ProductsListPage />
                 </CategoriesProvider>
               } />
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="/order/:orderId" element={<OrderDetailsPage />} />
-              <Route path="/cart" element={<CartPage />} />
-            </Routes>
-          </Layout>
-        </BrowserRouter>
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/order/:orderId" element={<OrderDetailsPage />} />
+            <Route path="/cart" element={<CartPage />} />
+          </Routes>
+        </Layout>
+      </BrowserRouter>
       </CartProvider>
     </AuthProvider>
   );

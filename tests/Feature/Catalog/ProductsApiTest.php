@@ -477,7 +477,7 @@ test('it returns correct types for min and max prices in response', function ():
 test('it finds correct min and max with many products for api endpoint', function (): void {
     $category = Category::factory()->create();
     $prices = [1, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 100, 200, 300, 500];
-    
+
     foreach ($prices as $price) {
         Product::factory()->create(['price' => $price, 'category_id' => $category->id]);
     }

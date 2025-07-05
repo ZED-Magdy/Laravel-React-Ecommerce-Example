@@ -15,7 +15,7 @@ export const ProductsListPage: React.FC = () => {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
-  const { cartItems, updateQuantity, removeItem } = useCart();
+  const { cartItems, updateQuantity, addItem, removeItem } = useCart();
   
   // URL parameters management
   const { params, setParam, setParams, clearParams } = useUrlParams();
@@ -207,6 +207,20 @@ export const ProductsListPage: React.FC = () => {
     );
   }
 
+  // Find the cart item for the selected product
+  const selectedCartItem = selectedProduct ? cartItems.find(item => item.product.id === selectedProduct.id) : undefined;
+
+  // Handler for add/update to cart from ProductDetails
+  const handleAddOrUpdateCart = (quantity: number) => {
+    if (!selectedProduct) return;
+    if (selectedCartItem) {
+      updateQuantity(selectedProduct.id, quantity);
+    } else {
+      addItem(selectedProduct, quantity);
+    }
+    setIsDetailsOpen(false);
+  };
+
   return (
     <div className="min-h-screen pb-12 bg-gray-50">
       {/* Breadcrumb */}
@@ -389,7 +403,8 @@ export const ProductsListPage: React.FC = () => {
           product={selectedProduct}
           isOpen={isDetailsOpen}
           onClose={() => setIsDetailsOpen(false)}
-          onAddToCart={() => {}}
+          cartQuantity={selectedCartItem ? selectedCartItem.quantity : 0}
+          onAddOrUpdateCart={handleAddOrUpdateCart}
         />
       </div>
     </div>

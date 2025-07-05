@@ -15,16 +15,26 @@ interface ProductDetailsProps {
   product: Product | null;
   isOpen: boolean;
   onClose: () => void;
-  onAddToCart: (quantity: number) => void;
+  cartQuantity: number;
+  onAddOrUpdateCart: (quantity: number) => void;
 }
 
 export const ProductDetails: React.FC<ProductDetailsProps> = ({
   product,
   isOpen,
   onClose,
-  onAddToCart,
+  cartQuantity,
+  onAddOrUpdateCart,
 }) => {
   const [quantity, setQuantity] = React.useState(1);
+  // Sync quantity with cartQuantity when product or cartQuantity changes
+  React.useEffect(() => {
+    if (cartQuantity && cartQuantity > 0) {
+      setQuantity(cartQuantity);
+    } else {
+      setQuantity(1);
+    }
+  }, [product, cartQuantity]);
 
   const handleIncrement = () => {
     if (product && quantity < product.stock) {
@@ -151,9 +161,9 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({
           <div className="p-8 border-t">
             <Button
               className="w-full h-12 text-base font-medium"
-              onClick={() => onAddToCart(quantity)}
+              onClick={() => onAddOrUpdateCart(quantity)}
             >
-              Add to Cart
+              {cartQuantity > 0 ? 'Update' : 'Add to Cart'}
             </Button>
           </div>
         </div>

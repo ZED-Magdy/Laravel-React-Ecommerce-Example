@@ -29,12 +29,12 @@ final class GetProductsAction
             })
             ->when($filters['price_min'] ?? null, function ($query, int $priceMin): void {
                 if ($priceMin > 0) {
-                    $query->whereMinPrice($priceMin);
+                    $query->where('price', '>=', $priceMin * 100);
                 }
             })
             ->when($filters['price_max'] ?? null, function ($query, int $priceMax): void {
                 if ($priceMax > 0) {
-                    $query->whereMaxPrice($priceMax);
+                    $query->where('price', '<=', $priceMax * 100);
                 }
             })
             ->when($filters['search'] ?? null, function ($query, string $search): void {

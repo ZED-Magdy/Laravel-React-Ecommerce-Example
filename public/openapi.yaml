@@ -302,7 +302,7 @@ paths:
           schema:
             type: integer
             minimum: 0
-          example: 1000
+          example: 100
         - name: price_max
           in: query
           description: Maximum price filter
@@ -310,7 +310,7 @@ paths:
           schema:
             type: integer
             minimum: 1
-          example: 5000
+          example: 500
         - name: search
           in: query
           description: Search term for product titles
@@ -459,25 +459,13 @@ paths:
                 success:
                   summary: Price range with products
                   value:
-                    min_price: 500
-                    max_price: 50000
+                    min_price: 5
+                    max_price: 500
                 empty:
                   summary: No products available
                   value:
                     min_price: 0
                     max_price: 0
-        '405':
-          description: Method not allowed
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-              examples:
-                method_not_allowed:
-                  summary: Invalid HTTP method
-                  value:
-                    message: "The GET method is not supported for this route. Supported methods: POST."
-
 components:
   securitySchemes:
     bearerAuth:
@@ -814,16 +802,16 @@ components:
         min_price:
           type: integer
           description: Minimum price across all products in cents
-          example: 500
+          example: 5
           minimum: 0
         max_price:
           type: integer
           description: Maximum price across all products in cents
-          example: 50000
+          example: 500
           minimum: 0
       example:
-        min_price: 500
-        max_price: 50000
+        min_price: 5
+        max_price: 500
 
 tags:
   - name: Authentication

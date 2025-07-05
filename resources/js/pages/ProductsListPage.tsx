@@ -36,13 +36,14 @@ export const ProductsListPage: React.FC = () => {
   // Initialize filters from URL parameters
   const filters = useMemo(() => {
     const newFilters = {
-      priceRange: parseInt(params.price_max as string) || 0,
+      priceMin: params.price_min ? parseInt(params.price_min as string) : undefined,
+      priceMax: params.price_max ? parseInt(params.price_max as string) : undefined,
       categories: params.categories ? 
         (Array.isArray(params.categories) ? params.categories : [params.categories]) : 
         [],
     };
     return newFilters;
-  }, [params.price_max, params.categories]);
+  }, [params.price_min, params.price_max, params.categories]);
 
   // Track if we're updating URL ourselves to avoid loops
   const isUpdatingUrlRef = useRef(false);
@@ -87,9 +88,12 @@ export const ProductsListPage: React.FC = () => {
       apiFilters.search = searchQuery.trim();
     }
     
-    // Add price filter
-    if (filters.priceRange > 0) {
-      apiFilters.price_max = filters.priceRange;
+    // Add price filters
+    if (filters.priceMin !== undefined) {
+      apiFilters.price_min = filters.priceMin;
+    }
+    if (filters.priceMax !== undefined) {
+      apiFilters.price_max = filters.priceMax;
     }
     
     // Add category filter
@@ -105,7 +109,7 @@ export const ProductsListPage: React.FC = () => {
     }
     
     return apiFilters;
-  }, [searchQuery, filters.priceRange, filters.categories, isInitialized]);
+  }, [searchQuery, filters.priceMin, filters.priceMax, filters.categories, isInitialized]);
 
   // Mark as initialized after URL params are loaded
   useEffect(() => {
@@ -160,7 +164,7 @@ export const ProductsListPage: React.FC = () => {
     setSearchInputValue(e.target.value);
   };
 
-  const handleApplyFilters = (newFilters: { priceRange: number; categories: string[] }) => {
+  const handleApplyFilters = (newFilters: { priceMin?: number; priceMax?: number; categories: string[] }) => {
     const urlParams: { [key: string]: string | string[] | undefined } = {};
     
     // Keep existing search (use debounced value)
@@ -168,9 +172,12 @@ export const ProductsListPage: React.FC = () => {
       urlParams.search = searchQuery;
     }
     
-    // Add price filter
-    if (newFilters.priceRange > 0) {
-      urlParams.price_max = newFilters.priceRange.toString();
+    // Add price filters
+    if (newFilters.priceMin !== undefined) {
+      urlParams.price_min = newFilters.priceMin.toString();
+    }
+    if (newFilters.priceMax !== undefined) {
+      urlParams.price_max = newFilters.priceMax.toString();
     }
     
     // Add categories filter

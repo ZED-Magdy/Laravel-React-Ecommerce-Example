@@ -118,6 +118,21 @@ export async function getProducts(filters: ProductFilters = {}): Promise<Product
 }
 
 /**
+ * Price range API interface
+ */
+export interface PriceRange {
+  min_price: number;
+  max_price: number;
+}
+
+/**
+ * Fetch min and max product prices from the API
+ */
+export async function getMinMaxProductsPrice(): Promise<PriceRange> {
+  return apiRequest<PriceRange>('/products/min-max-price');
+}
+
+/**
  * Transform API category data to filter format
  */
 export function transformCategoriesForFilter(categories: Category[]) {

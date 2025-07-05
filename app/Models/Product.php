@@ -53,28 +53,4 @@ final class Product extends Model implements HasMedia
             set: fn (mixed $value): int => is_numeric($value) ? (int) $value * 100 : 0,
         );
     }
-
-    /**
-     * @param  Builder<Product>  $builder
-     * @return Builder<Product>
-     *
-     * @phpstan-ignore-next-line
-     */
-    #[\Illuminate\Database\Eloquent\Attributes\Scope]
-    private function whereMinPrice(Builder $builder, int $priceMin): Builder
-    {
-        return $builder->where('price', '>=', $priceMin * 100);
-    }
-
-    /**
-     * @param  Builder<Product>  $builder
-     * @return Builder<Product>
-     *
-     * @phpstan-ignore-next-line
-     */
-    #[\Illuminate\Database\Eloquent\Attributes\Scope]
-    private function whereMaxPrice(Builder $builder, int $priceMax): Builder
-    {
-        return $builder->where('price', '<=', $priceMax * 100);
-    }
 }

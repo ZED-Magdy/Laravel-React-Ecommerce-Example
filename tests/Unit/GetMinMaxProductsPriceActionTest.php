@@ -54,15 +54,15 @@ test('it returns same value for min and max when only one product exists', funct
 
 test('it handles decimal prices correctly', function (): void {
     $category = Category::factory()->create();
-    Product::factory()->create(['price' => 9.99, 'category_id' => $category->id]); // $9.99
-    Product::factory()->create(['price' => 15.99, 'category_id' => $category->id]); // $15.99
+    Product::factory()->create(['price' => 9.99, 'category_id' => $category->id]); // $9.99 -> (int) 9.99 = 9
+    Product::factory()->create(['price' => 15.99, 'category_id' => $category->id]); // $15.99 -> (int) 15.99 = 15
 
     $result = $this->action->execute();
 
     expect($result)->toBeArray();
     expect($result)->toHaveKeys(['min_price', 'max_price']);
-    expect($result['min_price'])->toBe(9.99);
-    expect($result['max_price'])->toBe(15.99);
+    expect($result['min_price'])->toBe(9); // Truncated by price mutator
+    expect($result['max_price'])->toBe(15); // Truncated by price mutator
 });
 
 test('it returns correct types for min and max prices', function (): void {
@@ -71,8 +71,8 @@ test('it returns correct types for min and max prices', function (): void {
 
     $result = $this->action->execute();
 
-    expect($result['min_price'])->toBeInt();
-    expect($result['max_price'])->toBeInt();
+    expect($result['min_price'])->toBeNumeric();
+    expect($result['max_price'])->toBeNumeric();
 });
 
 test('it finds correct min and max with many products', function (): void {

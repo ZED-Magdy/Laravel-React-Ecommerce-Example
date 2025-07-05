@@ -4,13 +4,15 @@ import { Slider } from "@/components/ui/slider";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { useCategories } from "@/contexts/CategoriesContext";
+import { usePriceRange } from "@/hooks/usePriceRange";
 import { Loader2, AlertCircle } from "lucide-react";
 
 interface FilterPopupProps {
   onApplyFilters: (filters: any) => void;
   onClearFilters: () => void;
   initialFilters?: {
-    priceRange?: number;
+    priceMin?: number;
+    priceMax?: number;
     categories?: string[];
   };
 }
@@ -21,13 +23,23 @@ export const FilterPopup: React.FC<FilterPopupProps> = ({
   initialFilters 
 }) => {
   const [isOpen, setIsOpen] = React.useState(false);
-  const [priceRange, setPriceRange] = React.useState([initialFilters?.priceRange || 0]);
   const [selectedCategories, setSelectedCategories] = React.useState<string[]>(initialFilters?.categories || []);
   const { categories, loading: categoriesLoading, error: categoriesError, refetch } = useCategories();
+  const { priceRange: apiPriceRange, loading: priceRangeLoading, error: priceRangeError, refetch: refetchPriceRange } = usePriceRange();
 
-  // Update internal state when initial filters change
+  // Initialize price range state based on API data and initial filters
+  const [priceRange, setPriceRange] = React.useState<[number, number]>([0, 0]);
+
+  // Update internal state when initial filters or API data changes
   React.useEffect(() => {
-    setPriceRange([initialFilters?.priceRange || 0]);
+    if (apiPriceRange.max_price > 0) {
+      const minPrice = initialFilters?.priceMin ?? apiPriceRange.min_price;
+      const maxPrice = initialFilters?.priceMax ?? apiPriceRange.max_price;
+      setPriceRange([minPrice, maxPrice]);
+    }
+  }, [initialFilters, apiPriceRange]);
+
+  React.useEffect(() => {
     setSelectedCategories(initialFilters?.categories || []);
   }, [initialFilters]);
 
@@ -47,14 +59,17 @@ export const FilterPopup: React.FC<FilterPopupProps> = ({
 
   const handleApplyFilter = () => {
     onApplyFilters({
-      priceRange: priceRange[0],
+      priceMin: priceRange[0] === apiPriceRange.min_price ? undefined : priceRange[0],
+      priceMax: priceRange[1] === apiPriceRange.max_price ? undefined : priceRange[1],
       categories: selectedCategories,
     });
     setIsOpen(false);
   };
 
   const handleClearFilters = () => {
-    setPriceRange([0]);
+    if (apiPriceRange.max_price > 0) {
+      setPriceRange([apiPriceRange.min_price, apiPriceRange.max_price]);
+    }
     setSelectedCategories([]);
     onClearFilters();
     setIsOpen(false);
@@ -80,29 +95,57 @@ export const FilterPopup: React.FC<FilterPopupProps> = ({
           </SheetHeader>
           <div className="flex-1 overflow-y-auto p-6 space-y-8">
             <div>
-              <h4 className="text-sm font-semibold mb-6">Price</h4>
+              <h4 className="text-sm font-semibold mb-6">Price Range</h4>
               <div className="space-y-4">
-                <Slider
-                  defaultValue={[0]}
-                  max={300}
-                  step={1}
-                  onValueChange={setPriceRange}
-                  className="w-full"
-                />
-                <div className="flex justify-between items-center text-sm">
-                  <div className="flex items-center gap-2">
-                    <span className="text-gray-500">$</span>
-                    <span className="font-medium">0</span>
+                {priceRangeLoading ? (
+                  <div className="flex items-center justify-center py-8">
+                    <Loader2 className="h-4 w-4 animate-spin text-gray-400" />
+                    <span className="ml-2 text-sm text-gray-500">Loading price range...</span>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-gray-500">$</span>
-                    <span className="font-medium">{priceRange[0]}</span>
+                ) : priceRangeError ? (
+                  <div className="space-y-3">
+                    <div className="flex items-center text-amber-600">
+                      <AlertCircle className="h-4 w-4 mr-2" />
+                      <span className="text-sm">Failed to load price range</span>
+                    </div>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={() => refetchPriceRange()}
+                      className="w-full"
+                    >
+                      Try Again
+                    </Button>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-gray-500">$</span>
-                    <span className="font-medium">300</span>
-                  </div>
-                </div>
+                ) : (
+                  <>
+                    <Slider
+                      value={priceRange}
+                      min={apiPriceRange.min_price}
+                      max={apiPriceRange.max_price}
+                      step={1}
+                      onValueChange={(value) => setPriceRange([value[0], value[1]])}
+                      className="w-full"
+                    />
+                    <div className="flex justify-between items-center text-sm">
+                      <div className="flex items-center gap-2">
+                        <span className="text-gray-500">$</span>
+                        <span className="font-medium">{priceRange[0]}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-gray-500">to</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-gray-500">$</span>
+                        <span className="font-medium">{priceRange[1]}</span>
+                      </div>
+                    </div>
+                    <div className="flex justify-between items-center text-xs text-gray-400">
+                      <span>${apiPriceRange.min_price}</span>
+                      <span>${apiPriceRange.max_price}</span>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
             <div>

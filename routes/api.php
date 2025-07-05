@@ -18,3 +18,5 @@ Route::post('/login', [AuthController::class, 'login'])->name('login');
 Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
 
 Route::get('/products', [ProductController::class, 'index'])->name('products.index');
+
+Route::get('/products/min-max-price', [ProductController::class, 'getMinMaxProductsPrice'])->name('products.min-max-price');

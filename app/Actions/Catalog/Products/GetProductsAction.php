@@ -11,19 +11,19 @@ use Illuminate\Pagination\LengthAwarePaginator;
 final class GetProductsAction
 {
     /**
-     * @param  array{categories: array|null, category_id: int|null, price_min: int|null, price_max: int|null, search: string|null, page: int|null}  $filters
+     * @param  array{categories: array<int, int>|null, price_min: int|null, price_max: int|null, search: string|null, page: int|null}  $filters
      * @return LengthAwarePaginator<int, Product>
      */
     public function execute(array $filters): LengthAwarePaginator
     {
         return Product::query()
             ->when($filters['categories'] ?? null, function ($query, array $categories): void {
-                // Filter out empty values and ensure we have valid categories
-                $validCategories = array_filter($categories, function ($category) {
-                    return !empty($category) && is_numeric($category) && $category > 0;
-                });
-                
-                if (count($validCategories) > 0) {
+                $validCategories = array_filter($categories,
+                    fn ($category): bool => $category !== 0 && $category > 0);
+                /**
+                 * @var array<int, int> $validCategories
+                 */
+                if ($validCategories !== []) {
                     $query->whereIn('category_id', $validCategories);
                 }
             })
@@ -38,7 +38,7 @@ final class GetProductsAction
                 }
             })
             ->when($filters['search'] ?? null, function ($query, string $search): void {
-                if (strlen($search) > 0) {
+                if (mb_strlen($search) > 0) {
                     $query->where('title', 'like', '%'.$search.'%');
                 }
             })

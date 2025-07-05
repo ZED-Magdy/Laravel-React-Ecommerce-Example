@@ -57,9 +57,11 @@ final class Product extends Model implements HasMedia
     /**
      * @param  Builder<Product>  $builder
      * @return Builder<Product>
+     *
+     * @phpstan-ignore-next-line
      */
     #[\Illuminate\Database\Eloquent\Attributes\Scope]
-    protected function whereMinPrice(Builder $builder, int $priceMin): Builder
+    private function whereMinPrice(Builder $builder, int $priceMin): Builder
     {
         return $builder->where('price', '>=', $priceMin * 100);
     }
@@ -67,9 +69,11 @@ final class Product extends Model implements HasMedia
     /**
      * @param  Builder<Product>  $builder
      * @return Builder<Product>
+     *
+     * @phpstan-ignore-next-line
      */
     #[\Illuminate\Database\Eloquent\Attributes\Scope]
-    protected function whereMaxPrice(Builder $builder, int $priceMax): Builder
+    private function whereMaxPrice(Builder $builder, int $priceMax): Builder
     {
         return $builder->where('price', '<=', $priceMax * 100);
     }

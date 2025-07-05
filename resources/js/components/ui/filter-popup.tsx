@@ -5,6 +5,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { useCategories } from "@/contexts/CategoriesContext";
 import { usePriceRange } from "@/hooks/usePriceRange";
+import { PriceRangeSkeleton, CategoriesSkeleton } from "@/components/ui/filter-skeletons";
 import { Loader2, AlertCircle } from "lucide-react";
 
 interface FilterPopupProps {
@@ -98,10 +99,7 @@ export const FilterPopup: React.FC<FilterPopupProps> = ({
               <h4 className="text-sm font-semibold mb-6">Price Range</h4>
               <div className="space-y-4">
                 {priceRangeLoading ? (
-                  <div className="flex items-center justify-center py-8">
-                    <Loader2 className="h-4 w-4 animate-spin text-gray-400" />
-                    <span className="ml-2 text-sm text-gray-500">Loading price range...</span>
-                  </div>
+                  <PriceRangeSkeleton />
                 ) : priceRangeError ? (
                   <div className="space-y-3">
                     <div className="flex items-center text-amber-600">
@@ -152,10 +150,7 @@ export const FilterPopup: React.FC<FilterPopupProps> = ({
               <h4 className="text-sm font-semibold mb-6">Category</h4>
               <div className="space-y-4">
                 {categoriesLoading ? (
-                  <div className="flex items-center justify-center py-8">
-                    <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
-                    <span className="ml-2 text-sm text-gray-500">Loading categories...</span>
-                  </div>
+                  <CategoriesSkeleton />
                 ) : categoriesError ? (
                   <div className="space-y-3">
                     <div className="flex items-center text-amber-600">

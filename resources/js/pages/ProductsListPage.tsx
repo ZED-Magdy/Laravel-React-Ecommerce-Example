@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react'
 import { FilterPopup } from '@/components/ui/filter-popup';
 import { ProductDetails } from '@/components/ui/product-details';
 import { ProductCard } from '@/components/ui/product-card';
+import { ProductCardSkeleton } from '@/components/ui/product-card-skeleton';
 import { OrderSummary } from '@/components/ui/order-summary';
 import { Product } from '@/types/product';
 import { useProducts } from '@/hooks/useProducts';
@@ -205,20 +206,7 @@ export const ProductsListPage: React.FC = () => {
     fetchPrevPage();
   };
 
-  // Show loading state
-  if (loading && products.length === 0) {
-    return (
-      <div className="min-h-screen pb-12 bg-gray-50">
-        <div className="mx-auto px-4 md:px-32 py-8">
-          <div className="flex justify-center items-center h-64">
-            <div className="text-lg text-gray-600">Loading products...</div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Show error state
+  // Show error state (only for initial load errors)
   if (error && products.length === 0) {
     return (
       <div className="min-h-screen pb-12 bg-gray-50">
@@ -292,7 +280,7 @@ export const ProductsListPage: React.FC = () => {
                   </svg>
                   {isSearching && (
                     <div className="absolute right-3 top-3.5">
-                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-gray-400"></div>
+                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-500"></div>
                     </div>
                   )}
               </div>
@@ -302,16 +290,19 @@ export const ProductsListPage: React.FC = () => {
                 <h1 className="text-2xl font-bold">Casual</h1>
               </div>
 
-              {/* Loading overlay for pagination */}
-              {loading && products.length > 0 && (
-                <div className="absolute inset-0 bg-white bg-opacity-50 flex items-center justify-center z-10">
-                  <div className="text-lg text-gray-600">Loading...</div>
-                </div>
-              )}
-
               {/* Main products area */}
               <div className="flex-1 relative">
                 <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+                  {/* Show skeletons when loading initial data */}
+                  {loading && products.length === 0 && (
+                    <>
+                      {Array.from({ length: 6 }).map((_, index) => (
+                        <ProductCardSkeleton key={index} />
+                      ))}
+                    </>
+                  )}
+
+                  {/* Show products */}
                   {products.map((product) => (
                     <ProductCard
                       key={product.id}
@@ -322,6 +313,13 @@ export const ProductsListPage: React.FC = () => {
                     />
                   ))}
                 </div>
+
+                {/* Loading overlay for pagination (when products exist) */}
+                {loading && products.length > 0 && (
+                  <div className="absolute inset-0 bg-white bg-opacity-50 flex items-center justify-center z-10">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+                  </div>
+                )}
 
                 {/* Empty state */}
                 {products.length === 0 && !loading && (

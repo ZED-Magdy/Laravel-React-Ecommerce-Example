@@ -1,70 +1,16 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { QuantityControls } from '@/components/ui/quantity-controls';
 import { Product } from '@/types/product';
-
-interface CartItem {
-  id: number;
-  product: Product;
-  quantity: number;
-}
+import { useCart } from '@/contexts/CartContext';
 
 export const CartPage: React.FC = () => {
-  const [cartItems, setCartItems] = useState<CartItem[]>([
-    {
-      id: 1,
-      product: {
-        id: 1,
-        name: "Gradient Graphic T-shirt",
-        price: 145,
-        image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=400&fit=crop&auto=format",
-        category: "T-shirts",
-        stock: 25,
-      },
-      quantity: 1,
-    },
-    {
-      id: 2,
-      product: {
-        id: 2,
-        name: "Polo with Tipping Details",
-        price: 180,
-        image: "https://images.unsplash.com/photo-1586790170083-2f9ceadc732d?w=400&h=400&fit=crop&auto=format",
-        category: "Polo",
-        stock: 18,
-      },
-      quantity: 1,
-    },
-    {
-      id: 3,
-      product: {
-        id: 3,
-        name: "Classic Blue Jeans",
-        price: 200,
-        image: "https://images.unsplash.com/photo-1542272604-787c3835535d?w=400&h=400&fit=crop&auto=format",
-        category: "Jeans",
-        stock: 15,
-      },
-      quantity: 1,
-    },
-  ]);
+  const { cartItems, updateQuantity, removeItem } = useCart();
 
   // Calculate totals
   const subtotal = cartItems.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
   const shipping = 15.00;
   const tax = 12.50;
   const total = subtotal + shipping + tax;
-
-  const updateQuantity = (id: number, quantity: number) => {
-    setCartItems(prevItems => 
-      prevItems.map(item => 
-        item.id === id ? { ...item, quantity } : item
-      ).filter(item => item.quantity > 0)
-    );
-  };
-
-  const removeItem = (id: number) => {
-    setCartItems(prevItems => prevItems.filter(item => item.id !== id));
-  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -142,7 +88,7 @@ export const CartPage: React.FC = () => {
 };
 
 interface CartItemCardProps {
-  item: CartItem;
+  item: import('@/contexts/CartContext').CartItem;
   onUpdateQuantity: (id: number, quantity: number) => void;
   onRemove: (id: number) => void;
 }

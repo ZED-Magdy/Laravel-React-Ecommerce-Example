@@ -9,12 +9,13 @@ import { useProducts } from '@/hooks/useProducts';
 import { ProductFilters } from '@/lib/api';
 import { useUrlParams } from '@/hooks/useUrlParams';
 import { useDebounce } from '@/hooks/useDebounce';
+import { useCart } from '@/contexts/CartContext';
 
 export const ProductsListPage: React.FC = () => {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
-  const [cart, setCart] = useState<Record<number, number>>({});
   const [isInitialized, setIsInitialized] = useState(false);
+  const { cartItems, updateQuantity, removeItem } = useCart();
   
   // URL parameters management
   const { params, setParam, setParams, clearParams } = useUrlParams();
@@ -138,27 +139,6 @@ export const ProductsListPage: React.FC = () => {
   const handleProductClick = (product: Product) => {
     setSelectedProduct(product);
     setIsDetailsOpen(true);
-  };
-
-  const handleAddToCart = (quantity: number) => {
-    // Implement cart functionality
-    setIsDetailsOpen(false);
-  };
-
-  const updateQuantity = (id: number, qty: number) => {
-    setCart((prev) => {
-      if (qty <= 0) {
-        const { [id]: _, ...rest } = prev;
-        return rest;
-      }
-      return { ...prev, [id]: qty };
-    });
-  };
-
-  const getQty = (id: number) => cart[id] ?? 0;
-
-  const handleRemoveItem = (id: number) => {
-    updateQuantity(id, 0);
   };
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -309,9 +289,7 @@ export const ProductsListPage: React.FC = () => {
                     <ProductCard
                       key={product.id}
                       product={product}
-                      quantity={getQty(product.id)}
                       onProductClick={handleProductClick}
-                      onUpdateQuantity={updateQuantity}
                     />
                   ))}
                 </div>
@@ -398,10 +376,10 @@ export const ProductsListPage: React.FC = () => {
           <div className="hidden lg:block w-1/4">
             <div className="bg-white rounded-lg shadow-sm p-6">
               <OrderSummary
-                cart={cart}
-                products={products}
+                cart={Object.fromEntries(cartItems.map(item => [item.product.id, item.quantity]))}
+                products={cartItems.map(item => item.product)}
                 onUpdateQuantity={updateQuantity}
-                onRemoveItem={handleRemoveItem}
+                onRemoveItem={removeItem}
               />
             </div>
           </div>
@@ -411,7 +389,7 @@ export const ProductsListPage: React.FC = () => {
           product={selectedProduct}
           isOpen={isDetailsOpen}
           onClose={() => setIsDetailsOpen(false)}
-          onAddToCart={handleAddToCart}
+          onAddToCart={() => {}}
         />
       </div>
     </div>

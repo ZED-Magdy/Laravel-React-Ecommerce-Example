@@ -1,20 +1,31 @@
 import React from 'react';
 import { QuantityControls } from './quantity-controls';
 import { Product } from '@/types/product';
+import { useCart } from '@/contexts/CartContext';
 
 interface ProductCardProps {
   product: Product;
-  quantity: number;
   onProductClick: (product: Product) => void;
-  onUpdateQuantity: (id: number, qty: number) => void;
 }
 
 export const ProductCard: React.FC<ProductCardProps> = ({
   product,
-  quantity,
-  onProductClick,
-  onUpdateQuantity
+  onProductClick
 }) => {
+  const { cartItems, updateQuantity, addItem } = useCart();
+  const cartItem = cartItems.find(item => item.product.id === product.id);
+  const quantity = cartItem ? cartItem.quantity : 0;
+
+  const handleQuantityChange = (qty: number) => {
+    if (qty <= 0) {
+      updateQuantity(product.id, 0);
+    } else if (cartItem) {
+      updateQuantity(product.id, qty);
+    } else {
+      addItem(product, qty);
+    }
+  };
+
   return (
     <div className="bg-white border border-gray-100 rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow">
       {/* Product Image Section */}
@@ -59,7 +70,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
             value={quantity}
             min={0}
             max={product.stock}
-            onChange={(qty) => onUpdateQuantity(product.id, qty)}
+            onChange={handleQuantityChange}
           />
         </div>
       </div>

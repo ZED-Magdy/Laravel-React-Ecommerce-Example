@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { FilterPopup } from '@/components/ui/filter-popup';
 import { ProductDetails } from '@/components/ui/product-details';
 import { ProductCard } from '@/components/ui/product-card';
@@ -13,6 +13,7 @@ export const ProductsListPage: React.FC = () => {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [cart, setCart] = useState<Record<number, number>>({});
+  const [isInitialized, setIsInitialized] = useState(false);
   
   // URL parameters management
   const { params, setParam, setParams, clearParams } = useUrlParams();
@@ -24,38 +25,47 @@ export const ProductsListPage: React.FC = () => {
   // Check if search is being debounced (user is typing but API hasn't been called yet)
   const isSearching = searchInputValue !== searchQuery;
   
-  // Initialize search input from URL parameters on mount only
+  // Initialize search input from URL parameters
   useEffect(() => {
     const urlSearch = (params.search as string) || '';
-    setSearchInputValue(urlSearch);
-  }, []); // Only run once on mount
+    if (!isUpdatingUrlRef.current && urlSearch !== searchInputValue) {
+      setSearchInputValue(urlSearch);
+    }
+  }, [params.search]); // Respond to URL parameter changes
   
   // Initialize filters from URL parameters
-  const filters = useMemo(() => ({
-    priceRange: parseInt(params.price_max as string) || 0,
-    categories: params.categories ? 
-      (Array.isArray(params.categories) ? params.categories : [params.categories]) : 
-      [],
-  }), [params.price_max, params.categories]);
+  const filters = useMemo(() => {
+    const newFilters = {
+      priceRange: parseInt(params.price_max as string) || 0,
+      categories: params.categories ? 
+        (Array.isArray(params.categories) ? params.categories : [params.categories]) : 
+        [],
+    };
+    return newFilters;
+  }, [params.price_max, params.categories]);
 
   // Track if we're updating URL ourselves to avoid loops
   const isUpdatingUrlRef = useRef(false);
+  const lastUpdateRef = useRef<string>('');
   
   // Update URL when debounced search value changes
   useEffect(() => {
-    if (!isUpdatingUrlRef.current) {
+    if (!isUpdatingUrlRef.current && searchQuery !== lastUpdateRef.current) {
       isUpdatingUrlRef.current = true;
+      lastUpdateRef.current = searchQuery;
+      
       if (searchQuery.trim()) {
         setParam('search', searchQuery);
       } else {
         setParam('search', undefined);
       }
+      
       // Reset flag after a microtask to allow URL update to complete
       Promise.resolve().then(() => {
         isUpdatingUrlRef.current = false;
       });
     }
-  }, [searchQuery, setParam]);
+  }, [searchQuery]); // Remove setParam from dependencies
 
   // Handle browser navigation (back/forward buttons) - only sync from external URL changes
   useEffect(() => {
@@ -66,7 +76,7 @@ export const ProductsListPage: React.FC = () => {
         setSearchInputValue(urlSearch);
       }
     }
-  }, [params.search]); // Simplified dependencies
+  }, [params.search, searchInputValue, isSearching]); // Include all dependencies
 
   // Create API filters from current state (not URL params directly)
   const apiFilters = useMemo<ProductFilters>(() => {
@@ -84,17 +94,32 @@ export const ProductsListPage: React.FC = () => {
     
     // Add category filter
     if (filters.categories.length > 0 && !filters.categories.includes('all')) {
-      // Convert first category to number (assuming single category selection)
-      const categoryId = parseInt(filters.categories[0]);
-      if (!isNaN(categoryId)) {
-        apiFilters.category_id = categoryId;
+      // Convert categories to numbers and filter valid ones
+      const validCategories = filters.categories
+        .map(cat => parseInt(cat))
+        .filter(cat => !isNaN(cat) && cat > 0);
+      
+      if (validCategories.length > 0) {
+        apiFilters.categories = validCategories;
       }
     }
     
     return apiFilters;
-  }, [searchQuery, filters.priceRange, filters.categories]);
+  }, [searchQuery, filters.priceRange, filters.categories, isInitialized]);
 
-  // Use the products hook with filters
+  // Mark as initialized after URL params are loaded
+  useEffect(() => {
+    // Check if we have URL parameters or if this is the first load
+    const hasUrlParams = window.location.search.length > 0;
+    const hasLoadedParams = Object.keys(params).length > 0;
+    
+    if (!hasUrlParams || hasLoadedParams) {
+      // Either no URL params to load, or they've been loaded
+      setIsInitialized(true);
+    }
+  }, [params]);
+
+  // Use the products hook with filters only after initialization
   const { 
     products, 
     loading, 
@@ -103,7 +128,7 @@ export const ProductsListPage: React.FC = () => {
     refetch, 
     fetchNextPage, 
     fetchPrevPage 
-  } = useProducts(apiFilters);
+  } = useProducts(isInitialized ? apiFilters : {});
 
   const handleProductClick = (product: Product) => {
     setSelectedProduct(product);
@@ -112,7 +137,6 @@ export const ProductsListPage: React.FC = () => {
 
   const handleAddToCart = (quantity: number) => {
     // Implement cart functionality
-    console.log(`Added ${quantity} of ${selectedProduct?.name} to cart`);
     setIsDetailsOpen(false);
   };
 

@@ -64,29 +64,30 @@ test('it returns empty data when no products exist', function (): void {
         ]);
 });
 
-test('it filters products by category_id', function (): void {
+test('it filters products by categories', function (): void {
     $category1 = Category::factory()->create();
     $category2 = Category::factory()->create();
 
     Product::factory()->count(3)->create(['category_id' => $category1->id]);
     Product::factory()->count(2)->create(['category_id' => $category2->id]);
 
-    $response = $this->getJson('/api/products?category_id='.$category1->id);
+    $response = $this->getJson('/api/products?categories[]='.$category1->id.'&categories[]='.$category2->id);
 
     $response->assertOk();
 
-    expect($response->json('meta.total'))->toBe(3);
+    expect($response->json('meta.total'))->toBe(5);
 
+    $allowedCategories = [$category1->title, $category2->title];
     foreach ($response->json('data') as $product) {
-        expect($product['category'])->toBe($category1->title);
+        expect($allowedCategories)->toContain($product['category']);
     }
 });
 
 test('it filters products by price_min', function (): void {
     $category = Category::factory()->create();
-    Product::factory()->create(['price' => 5, 'category_id' => $category->id]); // $5.00 (500 cents)
-    Product::factory()->create(['price' => 10, 'category_id' => $category->id]); // $10.00 (1000 cents)
-    Product::factory()->create(['price' => 15, 'category_id' => $category->id]); // $15.00 (1500 cents)
+    Product::factory()->create(['price' => 5, 'category_id' => $category->id]);
+    Product::factory()->create(['price' => 10, 'category_id' => $category->id]);
+    Product::factory()->create(['price' => 15, 'category_id' => $category->id]);
 
     $response = $this->getJson('/api/products?price_min=10');
 
@@ -101,9 +102,9 @@ test('it filters products by price_min', function (): void {
 
 test('it filters products by price_max', function (): void {
     $category = Category::factory()->create();
-    Product::factory()->create(['price' => 5, 'category_id' => $category->id]); // $5.00 (500 cents)
-    Product::factory()->create(['price' => 10, 'category_id' => $category->id]); // $10.00 (1000 cents)
-    Product::factory()->create(['price' => 15, 'category_id' => $category->id]); // $15.00 (1500 cents)
+    Product::factory()->create(['price' => 5, 'category_id' => $category->id]);
+    Product::factory()->create(['price' => 10, 'category_id' => $category->id]);
+    Product::factory()->create(['price' => 15, 'category_id' => $category->id]);
 
     $response = $this->getJson('/api/products?price_max=10');
 
@@ -158,21 +159,21 @@ test('it combines multiple filters correctly', function (): void {
 
     Product::factory()->create([
         'title' => 'iPhone Case',
-        'price' => 20, // $20.00 (2000 cents)
+        'price' => 20,
         'category_id' => $category1->id,
     ]);
     Product::factory()->create([
         'title' => 'Phone Charger',
-        'price' => 15, // $15.00 (1500 cents)
+        'price' => 15,
         'category_id' => $category1->id,
     ]);
     Product::factory()->create([
         'title' => 'Phone Stand',
-        'price' => 10, // $10.00 (1000 cents)
+        'price' => 10,
         'category_id' => $category2->id,
     ]);
 
-    $response = $this->getJson(sprintf('/api/products?category_id=%s&price_max=18&search=phone', $category1->id));
+    $response = $this->getJson(sprintf('/api/products?categories[]=%s&price_max=18&search=phone', $category1->id));
 
     $response->assertOk();
 
@@ -186,9 +187,9 @@ test('it combines multiple filters correctly', function (): void {
 
 test('it returns products ordered by price ascending', function (): void {
     $category = Category::factory()->create();
-    Product::factory()->create(['price' => 15, 'category_id' => $category->id]); // $15.00 (1500 cents)
-    Product::factory()->create(['price' => 5, 'category_id' => $category->id]); // $5.00 (500 cents)
-    Product::factory()->create(['price' => 10, 'category_id' => $category->id]); // $10.00 (1000 cents)
+    Product::factory()->create(['price' => 15, 'category_id' => $category->id]);
+    Product::factory()->create(['price' => 5, 'category_id' => $category->id]);
+    Product::factory()->create(['price' => 10, 'category_id' => $category->id]);
 
     $response = $this->getJson('/api/products');
 
@@ -199,17 +200,17 @@ test('it returns products ordered by price ascending', function (): void {
 });
 
 test('it validates category_id parameter', function (): void {
-    $response = $this->getJson('/api/products?category_id=invalid');
+    $response = $this->getJson('/api/products?categories[]=invalid');
 
     $response->assertUnprocessable()
-        ->assertJsonValidationErrors(['category_id']);
+        ->assertJsonValidationErrors(['categories.0']);
 });
 
 test('it validates category_id exists in database', function (): void {
-    $response = $this->getJson('/api/products?category_id=999999');
+    $response = $this->getJson('/api/products?categories[]=999999');
 
     $response->assertUnprocessable()
-        ->assertJsonValidationErrors(['category_id']);
+        ->assertJsonValidationErrors(['categories.0']);
 });
 
 test('it validates price_min parameter', function (): void {
@@ -351,7 +352,7 @@ test('it handles empty filter parameters', function (): void {
     $category = Category::factory()->create();
     Product::factory()->count(3)->create(['category_id' => $category->id]);
 
-    $response = $this->getJson('/api/products?category_id=&price_min=&price_max=&search=');
+    $response = $this->getJson('/api/products?categories[]=&price_min=&price_max=&search=');
 
     $response->assertOk();
 
@@ -376,7 +377,7 @@ test('it returns consistent response structure across different filters', functi
 
     $endpoints = [
         '/api/products',
-        '/api/products?category_id='.$category->id,
+        '/api/products?categories[]='.$category->id,
         '/api/products?price_min=100',
         '/api/products?search=test',
     ];

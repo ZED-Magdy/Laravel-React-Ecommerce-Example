@@ -77,6 +77,7 @@ export interface ProductsResponse {
 
 export interface ProductFilters {
   category_id?: number;
+  categories?: number[];
   price_min?: number;
   price_max?: number;
   search?: string;
@@ -99,7 +100,16 @@ export async function getProducts(filters: ProductFilters = {}): Promise<Product
   // Add non-empty filters to search params
   Object.entries(filters).forEach(([key, value]) => {
     if (value !== undefined && value !== null && value !== '') {
-      searchParams.append(key, value.toString());
+      if (key === 'categories' && Array.isArray(value)) {
+        // Handle categories array as PHP-style array parameters
+        value.forEach(categoryId => {
+          if (categoryId !== undefined && categoryId !== null && categoryId !== '') {
+            searchParams.append('categories[]', categoryId.toString());
+          }
+        });
+      } else {
+        searchParams.append(key, value.toString());
+      }
     }
   });
 

@@ -5,6 +5,7 @@ import { ProductsListPage } from '../pages/ProductsListPage';
 import { OrderDetailsPage } from '../pages/OrderDetailsPage';
 import { CartPage } from '../pages/CartPage';
 import { AuthProvider } from '../contexts/AuthContext';
+import { CategoriesProvider } from '../contexts/CategoriesContext';
 
 export const App = () => {
   return (
@@ -12,7 +13,11 @@ export const App = () => {
       <BrowserRouter>
         <Layout>
           <Routes>
-            <Route path="/" element={<ProductsListPage />} />
+            <Route path="/" element={
+              <CategoriesProvider>
+                <ProductsListPage />
+              </CategoriesProvider>
+            } />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/order/:orderId" element={<OrderDetailsPage />} />
             <Route path="/cart" element={<CartPage />} />

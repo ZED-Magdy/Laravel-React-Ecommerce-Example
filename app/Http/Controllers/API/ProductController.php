@@ -19,7 +19,7 @@ final class ProductController extends Controller
     public function index(ProductFilterRequest $productFilterRequest): AnonymousResourceCollection
     {
         /**
-         * @var array{category_id: int|null, price_min: int|null, price_max: int|null, search: string|null, page: int|null} $filters
+         * @var array{categories: array|null, category_id: int|null, price_min: int|null, price_max: int|null, search: string|null, page: int|null} $filters
          */
         $filters = $productFilterRequest->validated();
         $cacheKey = 'products_'.md5((string) json_encode($filters));

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { getCategories, transformCategoriesForFilter } from '@/lib/api';
 
 interface FilterCategory {
@@ -6,18 +6,20 @@ interface FilterCategory {
   label: string;
 }
 
-interface UseCategoriesReturn {
+interface CategoriesContextType {
   categories: FilterCategory[];
   loading: boolean;
   error: string | null;
   refetch: () => Promise<void>;
 }
 
-/**
- * Custom hook for managing categories data
- * Fetches categories from API and transforms them for filter usage
- */
-export function useCategories(): UseCategoriesReturn {
+const CategoriesContext = createContext<CategoriesContextType | undefined>(undefined);
+
+interface CategoriesProviderProps {
+  children: ReactNode;
+}
+
+export function CategoriesProvider({ children }: CategoriesProviderProps) {
   const [categories, setCategories] = useState<FilterCategory[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -48,10 +50,26 @@ export function useCategories(): UseCategoriesReturn {
     fetchCategories();
   }, []);
 
-  return {
+  const value: CategoriesContextType = {
     categories,
     loading,
     error,
     refetch: fetchCategories,
   };
+
+  return (
+    <CategoriesContext.Provider value={value}>
+      {children}
+    </CategoriesContext.Provider>
+  );
+}
+
+export function useCategories(): CategoriesContextType {
+  const context = useContext(CategoriesContext);
+  
+  if (context === undefined) {
+    throw new Error('useCategories must be used within a CategoriesProvider');
+  }
+  
+  return context;
 } 

@@ -22,15 +22,25 @@ export function useUrlParams(): {
     const newParams: UrlParams = {};
 
     for (const [key, value] of searchParams.entries()) {
-      // Handle multiple values for the same key (e.g., categories)
-      if (newParams[key]) {
-        if (Array.isArray(newParams[key])) {
-          (newParams[key] as string[]).push(value);
-        } else {
-          newParams[key] = [newParams[key] as string, value];
+      // Handle PHP-style array parameters (e.g., categories[]=1&categories[]=2)
+      const arrayMatch = key.match(/^([^[]+)\[\]$/);
+      if (arrayMatch) {
+        const [, baseKey] = arrayMatch;
+        if (!newParams[baseKey]) {
+          newParams[baseKey] = [];
         }
+        (newParams[baseKey] as string[]).push(value);
       } else {
-        newParams[key] = value;
+        // Handle regular parameters
+        if (newParams[key]) {
+          if (Array.isArray(newParams[key])) {
+            (newParams[key] as string[]).push(value);
+          } else {
+            newParams[key] = [newParams[key] as string, value];
+          }
+        } else {
+          newParams[key] = value;
+        }
       }
     }
 
@@ -44,7 +54,12 @@ export function useUrlParams(): {
     Object.entries(newParams).forEach(([key, value]) => {
       if (value !== undefined && value !== null && value !== '') {
         if (Array.isArray(value)) {
-          value.forEach(v => searchParams.append(key, v));
+          // Format as PHP-style array parameters (e.g., categories[]=1&categories[]=2)
+          value.forEach((v) => {
+            if (v !== undefined && v !== null && v !== '') {
+              searchParams.append(`${key}[]`, v);
+            }
+          });
         } else {
           searchParams.set(key, value);
         }
@@ -93,7 +108,7 @@ export function useUrlParams(): {
 
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
-  }, [readParams]);
+  }, []); // Empty dependency array - only run once on mount
 
   return {
     params,

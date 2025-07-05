@@ -261,25 +261,40 @@ paths:
         - Products ordered by price (ascending)
         
         **Filtering Options:**
-        - **category_id**: Filter by specific category
+        - **categories[]**: Filter by one or more categories (PHP-style array format)
         - **price_min**: Minimum price filter
         - **price_max**: Maximum price filter
         - **search**: Search in product titles
         - **page**: Pagination page number
+        
+        **Examples:**
+        - Single category: `?categories[]=1`
+        - Multiple categories: `?categories[]=1&categories[]=2`
+        - Combined filters: `?categories[]=1&price_min=1000&search=phone`
         
         **Response:**
         Returns paginated products with metadata including total count, current page, and pagination links.
       operationId: getProducts
       security: []
       parameters:
-        - name: category_id
+        - name: categories[]
           in: query
-          description: Filter products by category ID
+          description: Filter products by one or more category IDs (PHP-style array format)
           required: false
           schema:
-            type: integer
-            minimum: 1
-          example: 1
+            type: array
+            items:
+              type: integer
+              minimum: 1
+          style: form
+          explode: true
+          examples:
+            single_category:
+              summary: Filter by single category
+              value: [1]
+            multiple_categories:
+              summary: Filter by multiple categories
+              value: [1, 2]
         - name: price_min
           in: query
           description: Minimum price filter
@@ -377,8 +392,15 @@ paths:
                   value:
                     message: "The given data was invalid."
                     errors:
-                      category_id:
-                        - "The selected category id is invalid."
+                      categories.0:
+                        - "The categories.0 field must be an integer."
+                invalid_category_exists:
+                  summary: Category doesn't exist
+                  value:
+                    message: "The given data was invalid."
+                    errors:
+                      categories.0:
+                        - "The selected categories.0 is invalid."
                 invalid_price:
                   summary: Invalid price range
                   value:

@@ -3,7 +3,7 @@ import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription, SheetH
 import { Slider } from "@/components/ui/slider";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
-import { useCategories } from "@/hooks/useCategories";
+import { useCategories } from "@/contexts/CategoriesContext";
 import { Loader2, AlertCircle } from "lucide-react";
 
 interface FilterPopupProps {

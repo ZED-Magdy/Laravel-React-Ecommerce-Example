@@ -42,7 +42,7 @@ test('it filters products by category', function (): void {
     Product::factory()->count(2)->create(['category_id' => $category2->id]);
 
     $result = $this->action->execute([
-        'category_id' => $category1->id,
+        'categories' => [$category1->id],
         'price_min' => null,
         'price_max' => null,
         'search' => null,
@@ -140,24 +140,24 @@ test('it combines multiple filters', function (): void {
     // Products in category 1
     Product::factory()->create([
         'title' => 'iPhone Case',
-        'price' => 20, // $20.00 (2000 cents)
+        'price' => 20,
         'category_id' => $category1->id,
     ]);
     Product::factory()->create([
         'title' => 'Phone Charger',
-        'price' => 15, // $15.00 (1500 cents)
+        'price' => 15,
         'category_id' => $category1->id,
     ]);
 
     // Products in category 2 (should be filtered out)
     Product::factory()->create([
         'title' => 'Phone Stand',
-        'price' => 10, // $10.00 (1000 cents)
+        'price' => 10,
         'category_id' => $category2->id,
     ]);
 
     $result = $this->action->execute([
-        'category_id' => $category1->id,
+        'categories' => [$category1->id],
         'price_min' => null,
         'price_max' => 18,
         'search' => 'phone',
@@ -177,7 +177,7 @@ test('it orders products by price ascending', function (): void {
     Product::factory()->create(['price' => 10, 'category_id' => $category->id]);
 
     $result = $this->action->execute([
-        'category_id' => null,
+        'categories' => null,
         'price_min' => null,
         'price_max' => null,
         'search' => null,
@@ -192,7 +192,7 @@ test('it returns empty paginator when no products match filters', function (): v
     Product::factory()->create(['title' => 'iPhone', 'category_id' => $category->id]);
 
     $result = $this->action->execute([
-        'category_id' => null,
+        'categories' => null,
         'price_min' => null,
         'price_max' => null,
         'search' => 'nonexistent',
@@ -207,7 +207,7 @@ test('it handles pagination correctly', function (): void {
     Product::factory()->count(25)->create(['category_id' => $category->id]);
 
     $result = $this->action->execute([
-        'category_id' => null,
+        'categories' => null,
         'price_min' => null,
         'price_max' => null,
         'search' => null,
@@ -225,7 +225,7 @@ test('it handles edge case with null category_id filter', function (): void {
     Product::factory()->count(3)->create(['category_id' => $category->id]);
 
     $result = $this->action->execute([
-        'category_id' => 0, // Should be treated as falsy
+        'categories' => [0], // Should be treated as falsy
         'price_min' => null,
         'price_max' => null,
         'search' => null,
@@ -241,7 +241,7 @@ test('it handles performance with large datasets', function (): void {
     $startTime = microtime(true);
 
     $result = $this->action->execute([
-        'category_id' => $category->id,
+        'categories' => [$category->id],
         'price_min' => null,
         'price_max' => null,
         'search' => null,

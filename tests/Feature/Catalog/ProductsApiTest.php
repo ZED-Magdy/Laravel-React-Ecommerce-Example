@@ -402,3 +402,149 @@ test('it returns consistent response structure across different filters', functi
             ]);
     }
 });
+
+// Min-Max Price API Tests
+test('it returns min and max prices when products exist', function (): void {
+    $category = Category::factory()->create();
+    Product::factory()->create(['price' => 5, 'category_id' => $category->id]);
+    Product::factory()->create(['price' => 10, 'category_id' => $category->id]);
+    Product::factory()->create(['price' => 15, 'category_id' => $category->id]);
+    Product::factory()->create(['price' => 20, 'category_id' => $category->id]);
+
+    $response = $this->getJson('/api/products/min-max-price');
+
+    $response->assertOk()
+        ->assertJsonStructure([
+            'min_price',
+            'max_price',
+        ])
+        ->assertJson([
+            'min_price' => 5,
+            'max_price' => 20,
+        ]);
+});
+
+test('it returns zero for both min and max when no products exist', function (): void {
+    $response = $this->getJson('/api/products/min-max-price');
+
+    $response->assertOk()
+        ->assertJson([
+            'min_price' => 0,
+            'max_price' => 0,
+        ]);
+});
+
+test('it returns same value for min and max when only one product exists', function (): void {
+    $category = Category::factory()->create();
+    Product::factory()->create(['price' => 100, 'category_id' => $category->id]);
+
+    $response = $this->getJson('/api/products/min-max-price');
+
+    $response->assertOk()
+        ->assertJson([
+            'min_price' => 100,
+            'max_price' => 100,
+        ]);
+});
+
+test('it handles decimal prices correctly for min-max endpoint', function (): void {
+    $category = Category::factory()->create();
+    Product::factory()->create(['price' => 9.99, 'category_id' => $category->id]); // $9.99
+    Product::factory()->create(['price' => 15.99, 'category_id' => $category->id]); // $15.99
+
+    $response = $this->getJson('/api/products/min-max-price');
+
+    $response->assertOk()
+        ->assertJson([
+            'min_price' => 9.99,
+            'max_price' => 15.99,
+        ]);
+});
+
+test('it returns correct types for min and max prices in response', function (): void {
+    $category = Category::factory()->create();
+    Product::factory()->create(['price' => 50, 'category_id' => $category->id]);
+
+    $response = $this->getJson('/api/products/min-max-price');
+
+    $response->assertOk();
+
+    $data = $response->json();
+    expect($data['min_price'])->toBeInt();
+    expect($data['max_price'])->toBeInt();
+});
+
+test('it finds correct min and max with many products for api endpoint', function (): void {
+    $category = Category::factory()->create();
+    $prices = [1, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 100, 200, 300, 500];
+    
+    foreach ($prices as $price) {
+        Product::factory()->create(['price' => $price, 'category_id' => $category->id]);
+    }
+
+    $response = $this->getJson('/api/products/min-max-price');
+
+    $response->assertOk()
+        ->assertJson([
+            'min_price' => 1,
+            'max_price' => 500,
+        ]);
+});
+
+test('it caches min-max prices for one hour', function (): void {
+    $category = Category::factory()->create();
+    Product::factory()->create(['price' => 100, 'category_id' => $category->id]);
+
+    // First request
+    $response1 = $this->getJson('/api/products/min-max-price');
+    $response1->assertOk();
+
+    // Verify cache was set
+    expect(Cache::has('min_max_products_price'))->toBe(true);
+
+    // Second request should use cache
+    $startTime = microtime(true);
+    $response2 = $this->getJson('/api/products/min-max-price');
+    $executionTime = microtime(true) - $startTime;
+
+    $response2->assertOk();
+    expect($executionTime)->toBeLessThan(0.1); // Should be very fast due to caching
+});
+
+test('it returns 405 for unsupported HTTP methods on min-max endpoint', function (): void {
+    $methods = ['POST', 'PUT', 'PATCH', 'DELETE'];
+
+    foreach ($methods as $method) {
+        $response = $this->call($method, '/api/products/min-max-price');
+        $response->assertMethodNotAllowed();
+    }
+});
+
+test('it accepts json content type for min-max endpoint', function (): void {
+    $category = Category::factory()->create();
+    Product::factory()->create(['price' => 100, 'category_id' => $category->id]);
+
+    $response = $this->json('GET', '/api/products/min-max-price', [], [
+        'Content-Type' => 'application/json',
+        'Accept' => 'application/json',
+    ]);
+
+    $response->assertOk()
+        ->assertHeader('Content-Type', 'application/json')
+        ->assertJson([
+            'min_price' => 100,
+            'max_price' => 100,
+        ]);
+});
+
+test('it measures performance under load for min-max endpoint', function (): void {
+    $category = Category::factory()->create();
+    Product::factory()->count(1000)->create(['category_id' => $category->id]);
+
+    $startTime = microtime(true);
+    $response = $this->getJson('/api/products/min-max-price');
+    $executionTime = microtime(true) - $startTime;
+
+    $response->assertOk();
+    expect($executionTime)->toBeLessThan(1.0); // Should complete within 1 second
+});

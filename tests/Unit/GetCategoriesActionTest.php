@@ -6,7 +6,6 @@ use App\Actions\Catalog\Categories\GetCategoriesAction;
 use App\Models\Category;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
-uses(RefreshDatabase::class);
 
 test('can retrieve all categories', function (): void {
     // Arrange

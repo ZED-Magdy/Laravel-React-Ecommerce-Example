@@ -8,7 +8,6 @@ use App\Models\Product;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Pagination\LengthAwarePaginator;
 
-uses(RefreshDatabase::class);
 
 beforeEach(function (): void {
     $this->action = new GetProductsAction();

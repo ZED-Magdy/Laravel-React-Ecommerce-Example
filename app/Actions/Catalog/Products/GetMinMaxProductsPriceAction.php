@@ -21,8 +21,8 @@ final class GetMinMaxProductsPriceAction
             ->first();
 
         return [
-            'min_price' => (int) ($prices->min_price ?? 0),
-            'max_price' => (int) ($prices->max_price ?? 0),
+            'min_price' => $prices->min_price ? ((int) $prices->min_price) / 100 : 0,
+            'max_price' => $prices->max_price ? ((int) $prices->max_price) / 100 : 0,
         ];
     }
 }

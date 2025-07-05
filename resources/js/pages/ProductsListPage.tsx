@@ -128,7 +128,7 @@ export const ProductsListPage: React.FC = () => {
     refetch, 
     fetchNextPage, 
     fetchPrevPage 
-  } = useProducts(isInitialized ? apiFilters : {});
+  } = useProducts(isInitialized ? apiFilters : undefined);
 
   const handleProductClick = (product: Product) => {
     setSelectedProduct(product);

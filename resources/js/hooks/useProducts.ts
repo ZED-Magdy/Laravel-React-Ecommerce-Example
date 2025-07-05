@@ -21,7 +21,7 @@ interface UseProductsReturn {
 /**
  * Custom hook for managing products data with filtering and pagination
  */
-export function useProducts(filters: ProductFilters = {}): UseProductsReturn {
+export function useProducts(filters?: ProductFilters): UseProductsReturn {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -42,7 +42,7 @@ export function useProducts(filters: ProductFilters = {}): UseProductsReturn {
       setError(null);
       
       // Use provided filters or current filters
-      const filtersToUse = customFilters || filters;
+      const filtersToUse = customFilters || filters || {};
       
       // Fetch products and categories concurrently
       const productsResponse = await getProducts(filtersToUse);
@@ -84,18 +84,24 @@ export function useProducts(filters: ProductFilters = {}): UseProductsReturn {
 
   const fetchNextPage = useCallback(async () => {
     if (pagination.hasNext) {
-      await fetchProducts({ ...filters, page: pagination.currentPage + 1 });
+      await fetchProducts({ ...(filters || {}), page: pagination.currentPage + 1 });
     }
   }, [pagination.hasNext, pagination.currentPage]); // Remove filters dependency
 
   const fetchPrevPage = useCallback(async () => {
     if (pagination.hasPrev) {
-      await fetchProducts({ ...filters, page: pagination.currentPage - 1 });
+      await fetchProducts({ ...(filters || {}), page: pagination.currentPage - 1 });
     }
   }, [pagination.hasPrev, pagination.currentPage]); // Remove filters dependency
 
   // Fetch products when filters change
   useEffect(() => {
+    // Skip API call if filters are undefined (not initialized yet)
+    if (filters === undefined) {
+      setLoading(false);
+      return;
+    }
+    
     const filtersString = JSON.stringify(filters);
     if (filtersString !== lastFiltersRef.current) {
       

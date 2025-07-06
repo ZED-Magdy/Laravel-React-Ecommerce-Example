@@ -39,7 +39,7 @@ Follow the steps below **exactly**; most issues occur when a step is skipped.
 1. **Clone the repository**
 
    ```bash
-   git clone git@github.com:ZED-Magdy/Daftra-Ecommerce.git
+   git@github.com:ZED-Magdy/Laravel-React-Ecommerce-Example.git
    cd daftra-ecommerce
    ```
 

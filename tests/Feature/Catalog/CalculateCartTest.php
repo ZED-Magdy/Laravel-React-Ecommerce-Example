@@ -1,8 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Models\Product;
 
-test('it calculates cart totals correctly', function () {
+test('it calculates cart totals correctly', function (): void {
     // Create test products
     $product1 = Product::factory()->create(['price' => 1000]); // $10.00
     $product2 = Product::factory()->create(['price' => 2000]); // $20.00
@@ -35,7 +37,7 @@ test('it calculates cart totals correctly', function () {
         ]);
 });
 
-test('it validates invalid product ids', function () {
+test('it validates invalid product ids', function (): void {
     $response = $this->postJson('/api/calculate-cart', [
         'items' => [
             ['product_id' => 99999, 'quantity' => 1],
@@ -46,7 +48,7 @@ test('it validates invalid product ids', function () {
         ->assertJsonValidationErrors(['items.0.product_id']);
 });
 
-test('it validates invalid quantities', function () {
+test('it validates invalid quantities', function (): void {
     $product = Product::factory()->create();
 
     $response = $this->postJson('/api/calculate-cart', [
@@ -59,7 +61,7 @@ test('it validates invalid quantities', function () {
         ->assertJsonValidationErrors(['items.0.quantity']);
 });
 
-test('it handles empty cart', function () {
+test('it handles empty cart', function (): void {
     $response = $this->postJson('/api/calculate-cart', [
         'items' => [],
     ]);
@@ -71,4 +73,4 @@ test('it handles empty cart', function () {
             'tax' => 0,
             'total' => 0,
         ]);
-}); 
+});

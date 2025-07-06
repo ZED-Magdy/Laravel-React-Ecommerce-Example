@@ -4,11 +4,8 @@ declare(strict_types=1);
 
 namespace App\Actions\Orders;
 
-use App\Models\Order;
 use App\Models\Product;
 use Exception;
-use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\DB;
 
 final readonly class CalculateCartAction
 {
@@ -21,13 +18,7 @@ final readonly class CalculateCartAction
      *         quantity: int,
      *     }>,
      * } $data
-     * 
-     * @return array{
-     *     subtotal: int,
-     *     shipping: int,
-     *     tax: float,
-     *     total: int,
-     * }
+     * @return array{subtotal: int, shipping: int, tax: float, total: float}
      */
     public function execute(array $data): array
     {
@@ -41,6 +32,7 @@ final readonly class CalculateCartAction
                 'total' => 0,
             ];
         }
+
         throw_if($products->count() !== count($productIds), new Exception('Invalid product IDs'));
 
         $subtotal = $products->sum(function (Product $product) use ($data): int {
@@ -52,8 +44,9 @@ final readonly class CalculateCartAction
             return $product->price * $item['quantity'];
         });
 
-        /** @var int $shipping */
-        $shipping = config('order.shipping_in_cents') / 100;
+        /** @var int $shippingInCents */
+        $shippingInCents = config('order.shipping_in_cents', 1500);
+        $shipping = $shippingInCents / 100;
         /** @var float $taxRate */
         $taxRate = config('order.tax_rate');
         $tax = $subtotal * $taxRate / 100;

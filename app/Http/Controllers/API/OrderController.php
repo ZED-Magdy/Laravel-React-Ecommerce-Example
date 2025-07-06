@@ -14,6 +14,7 @@ use App\Http\Requests\Orders\CalculateCartRequest;
 use App\Http\Requests\Orders\CheckoutRequest;
 use App\Http\Resources\OrderResource;
 use App\Models\Order;
+use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
@@ -37,8 +38,8 @@ final class OrderController extends Controller
             $order = $checkoutAction->execute($data);
 
             return response()->json($order, Response::HTTP_CREATED);
-        } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], Response::HTTP_BAD_REQUEST);
+        } catch (Exception $exception) {
+            return response()->json(['error' => $exception->getMessage()], Response::HTTP_BAD_REQUEST);
         }
     }
 
@@ -94,14 +95,16 @@ final class OrderController extends Controller
     /**
      * Calculate the cart.
      */
-    public function calculateCart(CalculateCartRequest $request, CalculateCartAction $calculateCartAction): JsonResponse
+    public function calculateCart(CalculateCartRequest $calculateCartRequest, CalculateCartAction $calculateCartAction): JsonResponse
     {
         try {
-            $cart = $calculateCartAction->execute($request->validated());
+            /** @var array{items: array<array{product_id: int, quantity: int}>} $data */
+            $data = $calculateCartRequest->validated();
+            $cart = $calculateCartAction->execute($data);
 
             return response()->json($cart, Response::HTTP_OK);
-        } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], Response::HTTP_BAD_REQUEST);
+        } catch (Exception $exception) {
+            return response()->json(['error' => $exception->getMessage()], Response::HTTP_BAD_REQUEST);
         }
     }
 }

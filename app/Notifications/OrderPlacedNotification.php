@@ -1,24 +1,24 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Notifications;
 
+use App\Models\Order;
+use App\Models\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
-use App\Models\Order;
-use App\Models\User;
 
-class OrderPlacedNotification extends Notification implements ShouldQueue
+final class OrderPlacedNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 
     /**
      * Create a new notification instance.
      */
-    public function __construct(public Order $order, public User $user)
-    {
-    }
+    public function __construct(public Order $order, public User $user) {}
 
     /**
      * Get the notification's delivery channels.
@@ -37,10 +37,10 @@ class OrderPlacedNotification extends Notification implements ShouldQueue
     {
         return (new MailMessage)
             ->line('A new order has been placed.')
-            ->line('Order Number: ' . $this->order->order_number)
-            ->line('Total: ' . $this->order->total)
-            ->line('Created At: ' . $this->order->created_at)
-            ->action('View Order', url('/order/' . $this->order->id))
+            ->line('Order Number: '.$this->order->order_number)
+            ->line('Total: '.$this->order->total)
+            ->line('Created At: '.$this->order->created_at)
+            ->action('View Order', url('/order/'.$this->order->id))
             ->line('Thank you for using our application!');
     }
 

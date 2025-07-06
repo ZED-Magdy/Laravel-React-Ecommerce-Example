@@ -42,8 +42,9 @@ final readonly class CheckoutAction
                     return $product->price * $item['quantity'];
                 });
 
-                /** @var int $shipping */
-                $shipping = config('order.shipping_in_cents', 1500) / 100;
+                /** @var int $shippingInCents */
+                $shippingInCents = config('order.shipping_in_cents', 1500);
+                $shipping = $shippingInCents / 100;
                 /** @var float $taxRate */
                 $taxRate = config('order.tax_rate', 15);
                 $tax = $subtotal * $taxRate / 100;

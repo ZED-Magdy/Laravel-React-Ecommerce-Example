@@ -1,9 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Actions\Orders\CalculateCartAction;
 use App\Models\Product;
 
-test('it calculates cart totals correctly', function () {
+test('it calculates cart totals correctly', function (): void {
     // Create test products
     $product1 = Product::factory()->create(['price' => 1000]); // $10.00
     $product2 = Product::factory()->create(['price' => 2000]); // $20.00
@@ -31,7 +33,7 @@ test('it calculates cart totals correctly', function () {
         ->and($result['total'])->toBe($total);
 });
 
-test('it returns zero totals for empty cart', function () {
+test('it returns zero totals for empty cart', function (): void {
     $action = new CalculateCartAction();
 
     $result = $action->execute([

@@ -53,26 +53,26 @@ test('checkout action preserves product details', function (): void {
 
 test('checkout action throws on empty items', function (): void {
     $action = new CheckoutAction(new GetNextOrderNumberAction());
-    expect(fn (): \App\Models\Order => $action->execute(['user_id' => $this->user->id, 'items' => []]))->toThrow(Exception::class);
+    expect(fn (): Order => $action->execute(['user_id' => $this->user->id, 'items' => []]))->toThrow(Exception::class);
 });
 
 test('checkout action throws on invalid product', function (): void {
     $action = new CheckoutAction(new GetNextOrderNumberAction());
     $items = [['product_id' => 999999, 'quantity' => 1]];
-    expect(fn (): \App\Models\Order => $action->execute(['user_id' => $this->user->id, 'items' => $items]))->toThrow(Exception::class);
+    expect(fn (): Order => $action->execute(['user_id' => $this->user->id, 'items' => $items]))->toThrow(Exception::class);
 });
 
 test('checkout action throws on zero quantity', function (): void {
     $action = new CheckoutAction(new GetNextOrderNumberAction());
     $items = [['product_id' => $this->products->first()->id, 'quantity' => 0]];
-    expect(fn (): \App\Models\Order => $action->execute(['user_id' => $this->user->id, 'items' => $items]))
+    expect(fn (): Order => $action->execute(['user_id' => $this->user->id, 'items' => $items]))
         ->toThrow(Exception::class);
 });
 
 test('checkout action throws on negative quantity', function (): void {
     $action = new CheckoutAction(new GetNextOrderNumberAction());
     $items = [['product_id' => $this->products->first()->id, 'quantity' => -1]];
-    expect(fn (): \App\Models\Order => $action->execute(['user_id' => $this->user->id, 'items' => $items]))->toThrow(Exception::class);
+    expect(fn (): Order => $action->execute(['user_id' => $this->user->id, 'items' => $items]))->toThrow(Exception::class);
 });
 
 test('checkout action calculates tax and total', function (): void {
@@ -106,12 +106,12 @@ test('get order details action throws for wrong user', function (): void {
     $order = $checkout->execute(['user_id' => $this->user->id, 'items' => $items]);
     $action = new GetOrderDetailsAction();
     $otherUser = User::factory()->create();
-    expect(fn (): \App\Models\Order => $action->execute($order->id, $otherUser->id))->toThrow(Exception::class);
+    expect(fn (): Order => $action->execute($order->id, $otherUser->id))->toThrow(Exception::class);
 });
 
 test('get order details action throws for non-existent order', function (): void {
     $action = new GetOrderDetailsAction();
-    expect(fn (): \App\Models\Order => $action->execute(99999, $this->user->id))->toThrow(Exception::class);
+    expect(fn (): Order => $action->execute(99999, $this->user->id))->toThrow(Exception::class);
 });
 
 test('get orders list action paginates orders', function (): void {

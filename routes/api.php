@@ -14,15 +14,15 @@ Route::middleware('auth:sanctum')
     ->get('/user', fn (Request $request): UserResource => new UserResource($request->user()))
     ->name('user.show');
 
-    Route::post('/login', [AuthController::class, 'login'])->name('login');
+Route::post('/login', [AuthController::class, 'login'])->name('login');
 
-    Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
+Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
 
-    Route::get('/products', [ProductController::class, 'index'])->name('products.index');
+Route::get('/products', [ProductController::class, 'index'])->name('products.index');
 
-    Route::get('/products/min-max-price', [ProductController::class, 'getMinMaxProductsPrice'])->name('products.min-max-price');
+Route::get('/products/min-max-price', [ProductController::class, 'getMinMaxProductsPrice'])->name('products.min-max-price');
 
-    Route::post('/calculate-cart', [OrderController::class, 'calculateCart'])->name('orders.calculate-cart');
+Route::post('/calculate-cart', [OrderController::class, 'calculateCart'])->name('orders.calculate-cart');
 
 Route::group(['middleware' => 'auth:sanctum'], function (): void {
 
@@ -35,6 +35,3 @@ Route::group(['middleware' => 'auth:sanctum'], function (): void {
     Route::get('/next-order-number', [OrderController::class, 'getNextOrderNumber'])->name('orders.next-order-number');
 
 });
-
-
-

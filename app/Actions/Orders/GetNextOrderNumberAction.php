@@ -14,7 +14,7 @@ final class GetNextOrderNumberAction
          * @var int $orderNumber
          */
         $orderNumber = Order::query()->max('order_number');
-        
+
         return (int) mb_str_pad((string) ($orderNumber + 1), 3, '0', STR_PAD_RIGHT);
     }
 }

@@ -14,7 +14,6 @@ Route::middleware('auth:sanctum')
     ->get('/user', fn (Request $request): UserResource => new UserResource($request->user()))
     ->name('user.show');
 
-Route::group(['middleware' => 'throttle:60,1'], function (): void {
     Route::post('/login', [AuthController::class, 'login'])->name('login');
 
     Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
@@ -24,7 +23,6 @@ Route::group(['middleware' => 'throttle:60,1'], function (): void {
     Route::get('/products/min-max-price', [ProductController::class, 'getMinMaxProductsPrice'])->name('products.min-max-price');
 
     Route::post('/calculate-cart', [OrderController::class, 'calculateCart'])->name('orders.calculate-cart');
-});
 
 Route::group(['middleware' => 'auth:sanctum'], function (): void {
 

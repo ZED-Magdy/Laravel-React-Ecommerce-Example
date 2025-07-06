@@ -260,7 +260,7 @@ test('it caches products for one hour', function (): void {
     // Verify cache was set (cache key is based on filters)
     $filters = [];
     $cacheKey = 'products_'.md5(json_encode($filters));
-    expect(Cache::has($cacheKey))->toBe(true);
+    expect(Cache::tags('products')->has($cacheKey))->toBe(true);
 
     // Second request should use cache
     $startTime = microtime(true);

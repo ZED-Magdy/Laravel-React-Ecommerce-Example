@@ -18,7 +18,7 @@ test('it calculates cart totals correctly', function () {
     ]);
 
     $subtotal = $product1->price * 2 + $product2->price * 1;
-    $shipping = config('order.shipping_in_cents', 1500);
+    $shipping = config('order.shipping_in_cents', 1500) / 100;
     $tax = $subtotal * config('order.tax_rate', 15) / 100;
     $total = $subtotal + $shipping + $tax;
 

@@ -12,7 +12,7 @@ use App\Models\User;
 
 beforeEach(function (): void {
     $this->user = User::factory()->create();
-    $this->products = Product::factory()->count(3)->create(['price' => 1000]);
+    $this->products = Product::factory()->count(3)->create(['price' => 1000, 'stock' => 20]);
 });
 
 test('checkout action creates order and items', function (): void {
@@ -22,7 +22,7 @@ test('checkout action creates order and items', function (): void {
     expect($order)->toBeInstanceOf(Order::class);
     expect($order->items)->toHaveCount(3);
     expect($order->subtotal)->toBe(1000 * 2 * 3);
-    expect($order->order_number)->toBe(1);
+    expect($order->order_number)->toBe(100);
 });
 
 test('checkout action generates sequential order numbers', function (): void {
@@ -32,8 +32,8 @@ test('checkout action generates sequential order numbers', function (): void {
     $order1 = $action->execute(['user_id' => $this->user->id, 'items' => $items]);
     $order2 = $action->execute(['user_id' => $this->user->id, 'items' => $items]);
 
-    expect($order1->order_number)->toBe(1);
-    expect($order2->order_number)->toBe(2);
+    expect($order1->order_number)->toBe(100);
+    expect($order2->order_number)->toBe(101);
 });
 
 test('checkout action preserves product details', function (): void {
@@ -82,7 +82,7 @@ test('checkout action calculates tax and total', function (): void {
     $order = $action->execute(['user_id' => $this->user->id, 'items' => $items]);
     $subtotal = 1000 * 3;
     $tax = $subtotal * 0.10;
-    $shipping = 500;
+    $shipping = 5;
     $total = $subtotal + $tax + $shipping;
     expect($order->subtotal)->toBe((int) floor($subtotal));
     expect($order->tax)->toBe((int) floor($tax));

@@ -8,7 +8,7 @@ use Laravel\Sanctum\Sanctum;
 
 beforeEach(function (): void {
     $this->user = User::factory()->create();
-    $this->products = Product::factory()->count(2)->create(['price' => 1000]);
+    $this->products = Product::factory()->count(2)->create(['price' => 1000, 'stock' => 20]);
 });
 
 test('can checkout successfully', function (): void {

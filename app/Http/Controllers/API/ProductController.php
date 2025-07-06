@@ -26,7 +26,7 @@ final class ProductController extends Controller
         $filters = $productFilterRequest->validated();
         $cacheKey = 'products_'.md5((string) json_encode($filters));
 
-        $products = Cache::remember($cacheKey, now()->addHour(), fn (): \Illuminate\Pagination\LengthAwarePaginator => (new GetProductsAction())->execute($filters));
+        $products = Cache::tags('products')->remember($cacheKey, now()->addHour(), fn (): \Illuminate\Pagination\LengthAwarePaginator => (new GetProductsAction())->execute($filters));
 
         return ProductResource::collection($products);
     }

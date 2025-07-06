@@ -65,6 +65,7 @@ final readonly class CheckoutAction
                     throw_unless($product, new Exception('Invalid product ID'));
 
                     throw_if($item['quantity'] <= 0, new Exception('Invalid quantity'));
+                    throw_if($product->stock < $item['quantity'], new Exception('Insufficient stock'));
                     $total = $product->price * $item['quantity'];
                     $order->items()->create([
                         'product_id' => $item['product_id'],
@@ -74,8 +75,12 @@ final readonly class CheckoutAction
                         'price' => $product->price,
                         'total' => $total,
                     ]);
+
+                    $product->decrement('stock', $item['quantity']);
                 }
 
+                Cache::tags('products')->flush();
+                Cache::forget('min_max_products_price');
                 Cache::put('order_'.$order->id.'_'.$data['user_id'], $order->load('items'), now()->addHour());
                 Cache::forget('orders_'.$data['user_id']);
                 Cache::put('next_order_number', $orderNumber + 1, now()->addHour());

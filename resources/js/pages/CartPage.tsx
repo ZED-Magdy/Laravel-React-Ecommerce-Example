@@ -2,7 +2,7 @@ import React, { useEffect, useState, useMemo } from 'react';
 import { QuantityControls } from '@/components/ui/quantity-controls';
 import { useCart } from '@/contexts/CartContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { getNextOrderNumber, calculateCart } from '@/lib/api';
+import { getNextOrderNumber, calculateCart, checkout } from '@/lib/api';
 
 interface CartTotals {
   subtotal: number;
@@ -12,7 +12,7 @@ interface CartTotals {
 }
 
 export const CartPage: React.FC = () => {
-  const { cartItems, updateQuantity, removeItem } = useCart();
+  const { cartItems, updateQuantity, removeItem, clearCart } = useCart();
   const { isAuthenticated } = useAuth();
   const [nextOrderNumber, setNextOrderNumber] = useState<number | null>(null);
   const [isLoadingNumber, setIsLoadingNumber] = useState(false);
@@ -23,12 +23,46 @@ export const CartPage: React.FC = () => {
     total: 0,
   });
   const [isCalculating, setIsCalculating] = useState(false);
+  const [isCheckingOut, setIsCheckingOut] = useState(false);
+  const [checkoutError, setCheckoutError] = useState<string | null>(null);
 
   // Memoize items array
   const items = useMemo(() => 
     cartItems.filter(item => item.quantity > 0),
     [cartItems]
   );
+
+  // Handle checkout
+  const handleCheckout = async () => {
+    if (!isAuthenticated || items.length === 0 || isCalculating) {
+      return;
+    }
+
+    setIsCheckingOut(true);
+    setCheckoutError(null);
+
+    try {
+      const orderItems = items.map(item => ({
+        product_id: item.product.id,
+        quantity: item.quantity,
+      }));
+
+      await checkout({ items: orderItems });
+      
+      // Clear the cart after successful checkout
+      clearCart();
+      
+      // Redirect to orders page
+      window.location.href = '/orders';
+    } catch (error) {
+      console.error('Checkout failed:', error);
+      setCheckoutError(
+        error instanceof Error ? error.message : 'Failed to create order. Please try again.'
+      );
+    } finally {
+      setIsCheckingOut(false);
+    }
+  };
 
   // Fetch next order number
   useEffect(() => {
@@ -165,7 +199,7 @@ export const CartPage: React.FC = () => {
                     <span className="text-gray-400">Calculating...</span>
                   ) : (
                     <span className="text-black text-sm font-medium">
-                      ${(cartTotals.subtotal).toFixed(2)}
+                      ${cartTotals.subtotal.toFixed(2)}
                     </span>
                   )}
                 </div>
@@ -177,7 +211,7 @@ export const CartPage: React.FC = () => {
                         <span className="text-gray-400">Calculating...</span>
                       ) : (
                         <span className="text-black text-sm font-medium">
-                          ${(cartTotals.shipping).toFixed(2)}
+                          ${cartTotals.shipping.toFixed(2)}
                         </span>
                       )}
                     </div>
@@ -187,7 +221,7 @@ export const CartPage: React.FC = () => {
                         <span className="text-gray-400">Calculating...</span>
                       ) : (
                         <span className="text-black text-sm font-medium">
-                          ${(cartTotals.tax).toFixed(2)}
+                          ${cartTotals.tax.toFixed(2)}
                         </span>
                       )}
                     </div>
@@ -204,20 +238,28 @@ export const CartPage: React.FC = () => {
                       <span className="text-gray-400">Calculating...</span>
                     ) : (
                       <span className="text-black text-lg font-bold">
-                        ${(cartTotals.total).toFixed(2)}
+                        ${cartTotals.total.toFixed(2)}
                       </span>
                     )}
                   </div>
                 </div>
               )}
 
+              {/* Error Message */}
+              {checkoutError && (
+                <div className="mb-4 p-3 bg-red-50 border border-red-100 rounded-lg">
+                  <p className="text-sm text-red-600">{checkoutError}</p>
+                </div>
+              )}
+
               {/* Place Order Button or Login Message */}
               {isAuthenticated ? (
                 <button 
+                  onClick={handleCheckout}
                   className="w-full bg-black text-white text-base font-medium py-3 rounded-sm hover:bg-gray-800 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
-                  disabled={cartItems.length === 0 || isCalculating}
+                  disabled={cartItems.length === 0 || isCalculating || isCheckingOut}
                 >
-                  {isCalculating ? 'Calculating...' : 'Place the order'}
+                  {isCheckingOut ? 'Processing...' : isCalculating ? 'Calculating...' : 'Place the order'}
                 </button>
               ) : (
                 <>

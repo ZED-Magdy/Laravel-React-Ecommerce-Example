@@ -1,5 +1,48 @@
+import { authFetch } from './auth';
+
+export interface ProductFilters {
+  search?: string;
+  price_min?: number;
+  price_max?: number;
+  categories?: number[];
+}
+
+export interface CartItem {
+  product_id: number;
+  quantity: number;
+}
+
+export interface CartTotals {
+  subtotal: number;
+  shipping: number;
+  tax: number;
+  total: number;
+}
+
+export interface CheckoutRequest {
+  items: CartItem[];
+}
+
+export interface Order {
+  id: number;
+  subtotal: number;
+  shipping: number;
+  tax: number;
+  total: number;
+  order_number: number;
+  items: OrderItem[];
+}
+
+export interface OrderItem {
+  product_id: number;
+  quantity: number;
+  title: string;
+  image_url: string;
+  price: number;
+  total: number;
+}
+
 const API_BASE_URL = '/api';
-import { authFetch } from '@/lib/auth';
 
 /**
  * Generic API request function
@@ -226,6 +269,24 @@ export async function calculateCart(items: CartItem[]): Promise<CartTotals> {
 
   if (!response.ok) {
     throw new Error('Failed to calculate cart totals');
+  }
+
+  return response.json();
+}
+
+
+/**
+ * Create a new order (checkout)
+ */
+export async function checkout(data: CheckoutRequest): Promise<Order> {
+  const response = await authFetch(`${API_BASE_URL}/checkout`, {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.error || 'Failed to create order');
   }
 
   return response.json();

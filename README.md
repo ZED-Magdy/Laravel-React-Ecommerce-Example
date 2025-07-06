@@ -1,6 +1,6 @@
-# Daftra E-commerce
+# E-commerce using Laravel and react
 
-A Laravel 10 + React (Vite & TypeScript) monorepo demo that powers a small e-commerce storefront and API.
+A Laravel 12 + React (Vite & TypeScript) monorepo demo that powers a small e-commerce storefront and API.
 
 ---
 

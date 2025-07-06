@@ -608,9 +608,6 @@ paths:
                   type: array
                   items:
                     type: object
-                    required:
-                      - product_id
-                      - quantity
                     properties:
                       product_id:
                         type: integer
@@ -663,38 +660,6 @@ paths:
                     shipping: 0
                     tax: 0
                     total: 0
-        '422':
-          description: Validation error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ValidationErrorResponse'
-              examples:
-                invalid_product:
-                  summary: Invalid product ID
-                  value:
-                    message: "The given data was invalid."
-                    errors:
-                      "items.0.product_id":
-                        - "The selected items.0.product_id is invalid."
-                invalid_quantity:
-                  summary: Invalid quantity
-                  value:
-                    message: "The given data was invalid."
-                    errors:
-                      "items.0.quantity":
-                        - "The items.0.quantity must be at least 1."
-        '500':
-          description: Server error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-              examples:
-                product_not_found:
-                  summary: Product not found
-                  value:
-                    message: "Product not found"
 
 components:
   securitySchemes:

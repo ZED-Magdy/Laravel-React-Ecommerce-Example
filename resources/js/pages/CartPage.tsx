@@ -1,16 +1,55 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { QuantityControls } from '@/components/ui/quantity-controls';
 import { Product } from '@/types/product';
 import { useCart } from '@/contexts/CartContext';
+import { useAuth } from '@/contexts/AuthContext';
+import { getNextOrderNumber } from '@/lib/api';
 
 export const CartPage: React.FC = () => {
   const { cartItems, updateQuantity, removeItem } = useCart();
+  const { isAuthenticated } = useAuth();
+  const [nextOrderNumber, setNextOrderNumber] = useState<number | null>(null);
+  const [isLoadingNumber, setIsLoadingNumber] = useState(false);
 
   // Calculate totals
   const subtotal = cartItems.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
   const shipping = 15.00;
   const tax = 12.50;
   const total = subtotal + shipping + tax;
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const fetchNextOrderNumber = async () => {
+      if (!isAuthenticated || cartItems.length === 0) {
+        setNextOrderNumber(null);
+        return;
+      }
+
+      setIsLoadingNumber(true);
+      try {
+        const response = await getNextOrderNumber();
+        if (isMounted) {
+          setNextOrderNumber(response.order_number);
+        }
+      } catch (error) {
+        console.error('Failed to fetch next order number:', error);
+        if (isMounted) {
+          setNextOrderNumber(null);
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoadingNumber(false);
+        }
+      }
+    };
+
+    fetchNextOrderNumber();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [isAuthenticated, cartItems.length]);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -19,7 +58,7 @@ export const CartPage: React.FC = () => {
         <div className="flex items-center text-sm">
           <a href="#" className="text-gray-500 hover:text-gray-700">Home</a>
           <span className="mx-2 text-gray-500">/</span>
-          <span className="text-gray-900">Casual</span>
+          <span className="text-gray-900">Cart</span>
         </div>
       </div>
 
@@ -31,14 +70,18 @@ export const CartPage: React.FC = () => {
           {/* Cart Items Section */}
           <div className="w-full md:w-2/3">
             <div className="bg-white border border-gray-100 rounded-2xl p-6 space-y-6">
-              {cartItems.map((item) => (
-                <CartItemCard
-                  key={item.id}
-                  item={item}
-                  onUpdateQuantity={updateQuantity}
-                  onRemove={removeItem}
-                />
-              ))}
+              {cartItems.length === 0 ? (
+                <p className="text-gray-500 text-center py-8">Your cart is empty.</p>
+              ) : (
+                cartItems.map((item) => (
+                  <CartItemCard
+                    key={item.id}
+                    item={item}
+                    onUpdateQuantity={updateQuantity}
+                    onRemove={removeItem}
+                  />
+                ))
+              )}
             </div>
           </div>
 
@@ -47,38 +90,68 @@ export const CartPage: React.FC = () => {
             <div className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm">
               {/* Header */}
               <div className="flex justify-between items-center mb-6">
-                <h2 className="text-xl font-bold text-black">Order Summary ( #123 )</h2>
-                <span className="text-blue-600 text-base">5 May 2025</span>
+                <h2 className="text-xl font-bold text-black">
+                  Order Summary
+                  {isAuthenticated && !isLoadingNumber && nextOrderNumber && (
+                    <span> (#{nextOrderNumber})</span>
+                  )}
+                </h2>
+                {isAuthenticated && isLoadingNumber && (
+                  <span className="text-sm text-gray-400">Loading...</span>
+                )}
               </div>
 
               {/* Summary Details */}
               <div className="space-y-3 mb-6">
                 <div className="flex justify-between items-center">
                   <span className="text-gray-600 text-sm">Subtotal</span>
-                  <span className="text-black text-sm font-medium">${subtotal}</span>
+                  <span className="text-black text-sm font-medium">${subtotal.toFixed(2)}</span>
                 </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-600 text-sm">Shipping</span>
-                  <span className="text-black text-sm font-medium">${shipping.toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-600 text-sm">Tax</span>
-                  <span className="text-black text-sm font-medium">${tax.toFixed(2)}</span>
-                </div>
+                {isAuthenticated && (
+                  <>
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-600 text-sm">Shipping</span>
+                      <span className="text-black text-sm font-medium">${shipping.toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-600 text-sm">Tax</span>
+                      <span className="text-black text-sm font-medium">${tax.toFixed(2)}</span>
+                    </div>
+                  </>
+                )}
               </div>
 
               {/* Total */}
-              <div className="border-t border-gray-200 pt-4 mb-6">
-                <div className="flex justify-between items-center">
-                  <span className="text-black text-lg font-bold">Total</span>
-                  <span className="text-black text-lg font-bold">${total.toFixed(2)}</span>
+              {isAuthenticated && (
+                <div className="border-t border-gray-200 pt-4 mb-6">
+                  <div className="flex justify-between items-center">
+                    <span className="text-black text-lg font-bold">Total</span>
+                    <span className="text-black text-lg font-bold">${total.toFixed(2)}</span>
+                  </div>
                 </div>
-              </div>
+              )}
 
-              {/* Place Order Button */}
-              <button className="w-full bg-black text-white text-base font-medium py-3 rounded-sm hover:bg-gray-800 transition-colors">
-                Place the order
-              </button>
+              {/* Place Order Button or Login Message */}
+              {isAuthenticated ? (
+                <button 
+                  className="w-full bg-black text-white text-base font-medium py-3 rounded-sm hover:bg-gray-800 transition-colors"
+                  disabled={cartItems.length === 0}
+                >
+                  Place the order
+                </button>
+              ) : (
+                <>
+                  <button 
+                    className="w-full bg-blue-600 text-white text-base font-medium py-3 rounded-sm hover:bg-blue-700 transition-colors"
+                    onClick={() => window.location.href = `/login?redirect=${encodeURIComponent(window.location.pathname)}`}
+                  >
+                    Login to Checkout
+                  </button>
+                  <p className="text-sm text-gray-500 text-center mt-4">
+                    Please login to see final price with shipping and tax
+                  </p>
+                </>
+              )}
             </div>
           </div>
         </div>

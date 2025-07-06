@@ -198,3 +198,35 @@ export function transformProductsForComponent(apiProducts: ApiProduct[]): any[] 
     };
   });
 } 
+
+export interface CartItem {
+  product_id: number;
+  quantity: number;
+}
+
+export interface CartTotals {
+  subtotal: number;
+  shipping: number;
+  tax: number;
+  total: number;
+}
+
+/**
+ * Calculate cart totals
+ */
+export async function calculateCart(items: CartItem[]): Promise<CartTotals> {
+  const response = await fetch(`${API_BASE_URL}/calculate-cart`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+    },
+    body: JSON.stringify({ items }),
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to calculate cart totals');
+  }
+
+  return response.json();
+} 

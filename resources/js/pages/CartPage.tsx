@@ -1,27 +1,41 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { QuantityControls } from '@/components/ui/quantity-controls';
-import { Product } from '@/types/product';
 import { useCart } from '@/contexts/CartContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { getNextOrderNumber } from '@/lib/api';
+import { getNextOrderNumber, calculateCart } from '@/lib/api';
+
+interface CartTotals {
+  subtotal: number;
+  shipping: number;
+  tax: number;
+  total: number;
+}
 
 export const CartPage: React.FC = () => {
   const { cartItems, updateQuantity, removeItem } = useCart();
   const { isAuthenticated } = useAuth();
   const [nextOrderNumber, setNextOrderNumber] = useState<number | null>(null);
   const [isLoadingNumber, setIsLoadingNumber] = useState(false);
+  const [cartTotals, setCartTotals] = useState<CartTotals>({
+    subtotal: 0,
+    shipping: 0,
+    tax: 0,
+    total: 0,
+  });
+  const [isCalculating, setIsCalculating] = useState(false);
 
-  // Calculate totals
-  const subtotal = cartItems.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
-  const shipping = 15.00;
-  const tax = 12.50;
-  const total = subtotal + shipping + tax;
+  // Memoize items array
+  const items = useMemo(() => 
+    cartItems.filter(item => item.quantity > 0),
+    [cartItems]
+  );
 
+  // Fetch next order number
   useEffect(() => {
     let isMounted = true;
 
     const fetchNextOrderNumber = async () => {
-      if (!isAuthenticated || cartItems.length === 0) {
+      if (!isAuthenticated || items.length === 0) {
         setNextOrderNumber(null);
         return;
       }
@@ -49,7 +63,49 @@ export const CartPage: React.FC = () => {
     return () => {
       isMounted = false;
     };
-  }, [isAuthenticated, cartItems.length]);
+  }, [isAuthenticated, items.length]);
+
+  // Calculate cart totals
+  useEffect(() => {
+    let isMounted = true;
+
+    const calculateTotals = async () => {
+      if (items.length === 0) {
+        setCartTotals({
+          subtotal: 0,
+          shipping: 0,
+          tax: 0,
+          total: 0,
+        });
+        return;
+      }
+
+      setIsCalculating(true);
+      try {
+        const cartItems = items.map(item => ({
+          product_id: item.product.id,
+          quantity: item.quantity,
+        }));
+
+        const totals = await calculateCart(cartItems);
+        if (isMounted) {
+          setCartTotals(totals);
+        }
+      } catch (error) {
+        console.error('Failed to calculate cart totals:', error);
+      } finally {
+        if (isMounted) {
+          setIsCalculating(false);
+        }
+      }
+    };
+
+    calculateTotals();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [items.length, cartItems]);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -105,17 +161,35 @@ export const CartPage: React.FC = () => {
               <div className="space-y-3 mb-6">
                 <div className="flex justify-between items-center">
                   <span className="text-gray-600 text-sm">Subtotal</span>
-                  <span className="text-black text-sm font-medium">${subtotal.toFixed(2)}</span>
+                  {isCalculating ? (
+                    <span className="text-gray-400">Calculating...</span>
+                  ) : (
+                    <span className="text-black text-sm font-medium">
+                      ${(cartTotals.subtotal).toFixed(2)}
+                    </span>
+                  )}
                 </div>
                 {isAuthenticated && (
                   <>
                     <div className="flex justify-between items-center">
                       <span className="text-gray-600 text-sm">Shipping</span>
-                      <span className="text-black text-sm font-medium">${shipping.toFixed(2)}</span>
+                      {isCalculating ? (
+                        <span className="text-gray-400">Calculating...</span>
+                      ) : (
+                        <span className="text-black text-sm font-medium">
+                          ${(cartTotals.shipping).toFixed(2)}
+                        </span>
+                      )}
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="text-gray-600 text-sm">Tax</span>
-                      <span className="text-black text-sm font-medium">${tax.toFixed(2)}</span>
+                      {isCalculating ? (
+                        <span className="text-gray-400">Calculating...</span>
+                      ) : (
+                        <span className="text-black text-sm font-medium">
+                          ${(cartTotals.tax).toFixed(2)}
+                        </span>
+                      )}
                     </div>
                   </>
                 )}
@@ -126,7 +200,13 @@ export const CartPage: React.FC = () => {
                 <div className="border-t border-gray-200 pt-4 mb-6">
                   <div className="flex justify-between items-center">
                     <span className="text-black text-lg font-bold">Total</span>
-                    <span className="text-black text-lg font-bold">${total.toFixed(2)}</span>
+                    {isCalculating ? (
+                      <span className="text-gray-400">Calculating...</span>
+                    ) : (
+                      <span className="text-black text-lg font-bold">
+                        ${(cartTotals.total).toFixed(2)}
+                      </span>
+                    )}
                   </div>
                 </div>
               )}
@@ -134,10 +214,10 @@ export const CartPage: React.FC = () => {
               {/* Place Order Button or Login Message */}
               {isAuthenticated ? (
                 <button 
-                  className="w-full bg-black text-white text-base font-medium py-3 rounded-sm hover:bg-gray-800 transition-colors"
-                  disabled={cartItems.length === 0}
+                  className="w-full bg-black text-white text-base font-medium py-3 rounded-sm hover:bg-gray-800 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
+                  disabled={cartItems.length === 0 || isCalculating}
                 >
-                  Place the order
+                  {isCalculating ? 'Calculating...' : 'Place the order'}
                 </button>
               ) : (
                 <>

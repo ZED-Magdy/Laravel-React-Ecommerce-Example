@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { Button } from "@/components/ui/button";
 import { QuantityControls } from "@/components/ui/quantity-controls";
 import { useNavigate } from 'react-router-dom';
-import { getNextOrderNumber } from '@/lib/api';
+import { getNextOrderNumber, calculateCart } from '@/lib/api';
 import { useAuth } from '@/contexts/AuthContext';
 
 interface Product {
@@ -21,6 +21,13 @@ interface OrderSummaryProps {
   onRemoveItem: (id: number) => void;
 }
 
+interface CartTotals {
+  subtotal: number;
+  shipping: number;
+  tax: number;
+  total: number;
+}
+
 export const OrderSummary: React.FC<OrderSummaryProps> = ({
   cart,
   products,
@@ -30,13 +37,23 @@ export const OrderSummary: React.FC<OrderSummaryProps> = ({
   const [nextOrderNumber, setNextOrderNumber] = useState<number | null>(null);
   const [isLoadingNumber, setIsLoadingNumber] = useState(false);
   const { isAuthenticated } = useAuth();
-  const items = products.filter((p) => cart[p.id] && cart[p.id] > 0);
-  const subtotal = items.reduce((sum, p) => sum + p.price * cart[p.id], 0);
-  const shipping = items.length ? 15 : 0;
-  const tax = items.length ? 12.5 : 0;
-  const total = subtotal + shipping + tax;
   const navigate = useNavigate();
+  
+  // Memoize items to prevent recreation on every render
+  const items = useMemo(() => 
+    products.filter((p) => cart[p.id] && cart[p.id] > 0),
+    [products, cart]
+  );
 
+  const [cartTotals, setCartTotals] = useState<CartTotals>({
+    subtotal: 0,
+    shipping: 0,
+    tax: 0,
+    total: 0,
+  });
+  const [isCalculating, setIsCalculating] = useState(false);
+
+  // First useEffect for order number
   useEffect(() => {
     let isMounted = true;
 
@@ -71,6 +88,48 @@ export const OrderSummary: React.FC<OrderSummaryProps> = ({
     };
   }, [isAuthenticated, items.length]);
 
+  // Second useEffect for cart calculations
+  useEffect(() => {
+    let isMounted = true;
+
+    const calculateTotals = async () => {
+      if (items.length === 0) {
+        setCartTotals({
+          subtotal: 0,
+          shipping: 0,
+          tax: 0,
+          total: 0,
+        });
+        return;
+      }
+
+      setIsCalculating(true);
+      try {
+        const cartItems = items.map(item => ({
+          product_id: item.id,
+          quantity: cart[item.id],
+        }));
+
+        const totals = await calculateCart(cartItems);
+        if (isMounted) {
+          setCartTotals(totals);
+        }
+      } catch (error) {
+        console.error('Failed to calculate cart totals:', error);
+      } finally {
+        if (isMounted) {
+          setIsCalculating(false);
+        }
+      }
+    };
+
+    calculateTotals();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [items.length, cart]); // Only depend on items.length and cart
+
   const handleProceedClick = () => {
     if (!isAuthenticated) {
       // Redirect to login with return URL
@@ -84,9 +143,9 @@ export const OrderSummary: React.FC<OrderSummaryProps> = ({
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h2 className="text-xl font-bold">Order Summary
-        {isAuthenticated && !isLoadingNumber && nextOrderNumber && (
+          {isAuthenticated && !isLoadingNumber && nextOrderNumber && (
             <span> (#{nextOrderNumber})</span>
-        )}
+          )}
         </h2>
         {isAuthenticated && isLoadingNumber && (
           <span className="text-sm text-gray-400">
@@ -152,21 +211,37 @@ export const OrderSummary: React.FC<OrderSummaryProps> = ({
         <div className="space-y-3 text-sm">
           <div className="flex justify-between">
             <span className="text-gray-600">Subtotal</span>
-            <span className="font-medium">${subtotal.toFixed(2)}</span>
+            {isCalculating ? (
+              <span className="text-gray-400">Calculating...</span>
+            ) : (
+              <span className="font-medium">${(cartTotals.subtotal).toFixed(2)}</span>
+            )}
           </div>
           {isAuthenticated && (
             <>
               <div className="flex justify-between">
                 <span className="text-gray-600">Shipping</span>
-                <span className="font-medium">${shipping.toFixed(2)}</span>
+                {isCalculating ? (
+                  <span className="text-gray-400">Calculating...</span>
+                ) : (
+                  <span className="font-medium">${(cartTotals.shipping).toFixed(2)}</span>
+                )}
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-600">Tax</span>
-                <span className="font-medium">${tax.toFixed(2)}</span>
+                {isCalculating ? (
+                  <span className="text-gray-400">Calculating...</span>
+                ) : (
+                  <span className="font-medium">${(cartTotals.tax).toFixed(2)}</span>
+                )}
               </div>
               <div className="flex justify-between text-lg font-semibold pt-3 border-t">
                 <span>Total</span>
-                <span>${total.toFixed(2)}</span>
+                {isCalculating ? (
+                  <span className="text-gray-400">Calculating...</span>
+                ) : (
+                  <span>${(cartTotals.total).toFixed(2)}</span>
+                )}
               </div>
             </>
           )}
@@ -178,8 +253,9 @@ export const OrderSummary: React.FC<OrderSummaryProps> = ({
         <Button 
           className="w-full h-12 text-base"
           onClick={handleProceedClick}
+          disabled={isCalculating}
         >
-          {isAuthenticated ? 'Proceed to Checkout' : 'Login to Checkout'}
+          {isCalculating ? 'Calculating...' : (isAuthenticated ? 'Proceed to Checkout' : 'Login to Checkout')}
         </Button>
       )}
 

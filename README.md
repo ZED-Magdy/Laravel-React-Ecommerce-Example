@@ -120,6 +120,12 @@ Follow the steps below **exactly**; most issues occur when a step is skipped.
    composer run dev
    ```
 
+   The default credentials is:
+   ```
+   test@example.com
+   password
+   ```
+
    The script spawns **four** concurrent processes:
 
    | Name    | Command                                   | Purpose |

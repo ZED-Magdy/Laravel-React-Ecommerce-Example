@@ -197,7 +197,7 @@ export const ProductsListPage: React.FC = () => {
             <div className="text-lg text-red-600 mb-4">Error: {error}</div>
             <button 
               onClick={() => refetch()}
-              className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
+              className="bg-black hover:bg-gray-800 text-white px-4 py-2 rounded"
             >
               Retry
             </button>
@@ -240,7 +240,7 @@ export const ProductsListPage: React.FC = () => {
       </div>
       <div className="mx-auto px-4 md:px-32">
         {/* Rest of the content */}
-        <div className="flex justify-between space-y-6">
+        <div className="flex justify-between space-y-6 md:space-y-0 gap-2">
           {/* Search and Filter Area */}
           <div className="bg-white shadow-sm rounded-lg p-6 w-full md:w-3/4">
             <div className="flex flex-col space-y-4">
@@ -288,6 +288,10 @@ export const ProductsListPage: React.FC = () => {
 
             {/* Main products area */}
               <div className="flex-1 relative">
+                {/* Results Count */}
+              <div className="text-sm mb-4 text-gray-500">
+                Showing {products.length} of {pagination.totalItems} Products
+              </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
                   {/* Show skeletons when loading initial data */}
                   {loading && products.length === 0 && (
@@ -378,16 +382,11 @@ export const ProductsListPage: React.FC = () => {
                 </button>
               </div>
             </div>
-              
-              {/* Results Count */}
-              <div className="text-sm text-gray-500">
-                Showing {products.length} of {pagination.totalItems} Products
-              </div>
             </div>
           </div>
           
           {/* Order Summary */}
-          <div className="hidden lg:block w-1/4">
+          <div className="hidden md:block w-1/4">
               <div className="bg-white rounded-lg shadow-sm p-6">
                 <OrderSummary
                 cart={Object.fromEntries(cartItems.map(item => [item.product.id, item.quantity]))}

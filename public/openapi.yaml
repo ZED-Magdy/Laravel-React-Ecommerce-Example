@@ -585,6 +585,117 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+
+  /calculate-cart:
+    post:
+      tags:
+        - Orders
+      summary: Calculate Cart Totals
+      description: |
+        Calculate the totals for a cart including subtotal, shipping, tax, and total.
+        This endpoint can be used without authentication to get estimated totals.
+      operationId: calculateCart
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - items
+              properties:
+                items:
+                  type: array
+                  items:
+                    type: object
+                    required:
+                      - product_id
+                      - quantity
+                    properties:
+                      product_id:
+                        type: integer
+                        example: 1
+                      quantity:
+                        type: integer
+                        minimum: 1
+                        example: 2
+      responses:
+        '200':
+          description: Cart totals calculated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - subtotal
+                  - shipping
+                  - tax
+                  - total
+                properties:
+                  subtotal:
+                    type: integer
+                    description: Subtotal in cents
+                    example: 4000
+                  shipping:
+                    type: integer
+                    description: Shipping cost in cents
+                    example: 1500
+                  tax:
+                    type: integer
+                    description: Tax amount in cents
+                    example: 350
+                  total:
+                    type: integer
+                    description: Total amount in cents
+                    example: 5850
+              examples:
+                success:
+                  summary: Cart with items
+                  value:
+                    subtotal: 4000
+                    shipping: 1500
+                    tax: 350
+                    total: 5850
+                empty:
+                  summary: Empty cart
+                  value:
+                    subtotal: 0
+                    shipping: 0
+                    tax: 0
+                    total: 0
+        '422':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+              examples:
+                invalid_product:
+                  summary: Invalid product ID
+                  value:
+                    message: "The given data was invalid."
+                    errors:
+                      "items.0.product_id":
+                        - "The selected items.0.product_id is invalid."
+                invalid_quantity:
+                  summary: Invalid quantity
+                  value:
+                    message: "The given data was invalid."
+                    errors:
+                      "items.0.quantity":
+                        - "The items.0.quantity must be at least 1."
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                product_not_found:
+                  summary: Product not found
+                  value:
+                    message: "Product not found"
+
 components:
   securitySchemes:
     bearerAuth:

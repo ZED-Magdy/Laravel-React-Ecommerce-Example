@@ -30,4 +30,9 @@ Route::group(['middleware' => 'auth:sanctum'], function (): void {
     Route::get('/orders', [OrderController::class, 'getOrdersList'])->name('orders.index');
 
     Route::get('/next-order-number', [OrderController::class, 'getNextOrderNumber'])->name('orders.next-order-number');
+
 });
+
+Route::post('/calculate-cart', [OrderController::class, 'calculateCart'])->name('orders.calculate-cart');
+
+

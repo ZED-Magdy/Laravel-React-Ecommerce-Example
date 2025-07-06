@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\API;
 
+use App\Actions\Orders\CalculateCartAction;
 use App\Actions\Orders\CheckoutAction;
 use App\Actions\Orders\GetNextOrderNumberAction;
 use App\Actions\Orders\GetOrderDetailsAction;
 use App\Actions\Orders\GetOrdersListAction;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Orders\CalculateCartRequest;
 use App\Http\Requests\Orders\CheckoutRequest;
 use App\Http\Resources\OrderResource;
 use App\Models\Order;
@@ -25,15 +27,19 @@ final class OrderController extends Controller
     /**
      * Checkout the order.
      */
-    public function checkout(CheckoutRequest $checkoutRequest, CheckoutAction $checkoutAction): OrderResource
+    public function checkout(CheckoutRequest $checkoutRequest, CheckoutAction $checkoutAction): JsonResponse
     {
-        /** @var \App\Models\User $user */
-        $user = Auth::user();
-        /** @var array{user_id: int, items: array<array{product_id: int, quantity: int}>} $data */
-        $data = [...$checkoutRequest->validated(), 'user_id' => $user->id];
-        $order = $checkoutAction->execute($data);
+        try {
+            /** @var \App\Models\User $user */
+            $user = Auth::user();
+            /** @var array{user_id: int, items: array<array{product_id: int, quantity: int}>} $data */
+            $data = [...$checkoutRequest->validated(), 'user_id' => $user->id];
+            $order = $checkoutAction->execute($data);
 
-        return new OrderResource($order);
+            return response()->json($order, Response::HTTP_CREATED);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], Response::HTTP_BAD_REQUEST);
+        }
     }
 
     /**
@@ -83,5 +89,19 @@ final class OrderController extends Controller
         return response()->json([
             'order_number' => $orderNumber,
         ]);
+    }
+
+    /**
+     * Calculate the cart.
+     */
+    public function calculateCart(CalculateCartRequest $request, CalculateCartAction $calculateCartAction): JsonResponse
+    {
+        try {
+            $cart = $calculateCartAction->execute($request->validated());
+
+            return response()->json($cart, Response::HTTP_OK);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], Response::HTTP_BAD_REQUEST);
+        }
     }
 }

@@ -21,7 +21,7 @@ Route::get('/categories', [CategoryController::class, 'index'])->name('categorie
 Route::get('/products', [ProductController::class, 'index'])->name('products.index');
 
 Route::get('/products/min-max-price', [ProductController::class, 'getMinMaxProductsPrice'])->name('products.min-max-price');
-Route::group(['middleware' => 'auth:sanctum'], function () {
+Route::group(['middleware' => 'auth:sanctum'], function (): void {
 
     Route::post('/checkout', [OrderController::class, 'checkout'])->name('checkout');
 

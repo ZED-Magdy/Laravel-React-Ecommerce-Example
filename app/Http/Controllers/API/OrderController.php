@@ -61,8 +61,8 @@ final class OrderController extends Controller
         $user = $request->user();
         $orders = Cache::remember(
             'orders_'.$user->id,
-             now()->addHour(), 
-             fn (): LengthAwarePaginator => $getOrdersListAction->execute((int) $user->id)
+            now()->addHour(),
+            fn (): LengthAwarePaginator => $getOrdersListAction->execute((int) $user->id)
         );
 
         return OrderResource::collection($orders);
@@ -73,13 +73,13 @@ final class OrderController extends Controller
      */
     public function getNextOrderNumber(Request $request, GetNextOrderNumberAction $getNextOrderNumberAction): JsonResponse
     {
-        /** @var \App\Models\User $user */
-        $user = $request->user();
+        $request->user();
         $orderNumber = Cache::remember(
-            'next_order_number_'.$user->id,
+            'next_order_number',
             now()->addHour(),
-            fn (): int => $getNextOrderNumberAction->execute((int) $user->id)
+            fn (): int => $getNextOrderNumberAction->execute()
         );
+
         return response()->json([
             'order_number' => $orderNumber,
         ]);

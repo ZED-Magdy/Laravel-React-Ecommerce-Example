@@ -316,7 +316,7 @@ test('it handles concurrent requests properly', function (): void {
 
     // Simulate concurrent requests
     $responses = [];
-    for ($i = 0; $i < 5; $i++) {
+    for ($i = 0; $i < 5; ++$i) {
         $responses[] = $this->getJson('/api/products');
     }
 

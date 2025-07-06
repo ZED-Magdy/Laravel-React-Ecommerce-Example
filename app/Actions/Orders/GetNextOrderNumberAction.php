@@ -8,10 +8,13 @@ use App\Models\Order;
 
 final class GetNextOrderNumberAction
 {
-    public function execute(int $userId): int
+    public function execute(): int
     {
-        return Order::query()
-            ->where('user_id', $userId)
-            ->max('order_number') + 1;
+        /**
+         * @var int $orderNumber
+         */
+        $orderNumber = Order::query()->max('order_number');
+        
+        return (int) mb_str_pad((string) ($orderNumber + 1), 3, '0', STR_PAD_RIGHT);
     }
 }

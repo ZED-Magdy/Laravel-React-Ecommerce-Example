@@ -10,11 +10,9 @@ use Exception;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
-final class CheckoutAction
+final readonly class CheckoutAction
 {
-    public function __construct(protected GetNextOrderNumberAction $getNextOrderNumberAction)
-    {
-    }
+    public function __construct(private GetNextOrderNumberAction $getNextOrderNumberAction) {}
 
     /**
      * Execute the checkout action.
@@ -50,7 +48,7 @@ final class CheckoutAction
                 $tax = $subtotal * $taxRate / 100;
                 $total = $subtotal + $shipping + $tax;
 
-                $orderNumber = $this->getNextOrderNumberAction->execute($data['user_id']);
+                $orderNumber = $this->getNextOrderNumberAction->execute();
 
                 /** @var Order $order */
                 $order = Order::query()->create([
@@ -80,7 +78,7 @@ final class CheckoutAction
 
                 Cache::put('order_'.$order->id.'_'.$data['user_id'], $order->load('items'), now()->addHour());
                 Cache::forget('orders_'.$data['user_id']);
-                Cache::put('next_order_number_'.$data['user_id'], $orderNumber + 1, now()->addHour());
+                Cache::put('next_order_number', $orderNumber + 1, now()->addHour());
 
                 return $order;
             });

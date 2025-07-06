@@ -188,7 +188,7 @@ test('handles concurrent requests properly', function (): void {
     $startTime = microtime(true);
 
     // Act - Make multiple concurrent requests
-    for ($i = 0; $i < 3; $i++) {
+    for ($i = 0; $i < 3; ++$i) {
         $responses[] = $this->postJson('/api/login', [
             'email' => 'test@example.com',
             'password' => 'wrongpassword',

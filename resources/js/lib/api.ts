@@ -23,6 +23,15 @@ export interface CheckoutRequest {
   items: CartItem[];
 }
 
+export interface OrderItem {
+  product_id: number;
+  quantity: number;
+  title: string;
+  image_url: string;
+  price: number;
+  total: number;
+}
+
 export interface Order {
   id: number;
   subtotal: number;
@@ -33,13 +42,31 @@ export interface Order {
   items: OrderItem[];
 }
 
-export interface OrderItem {
-  product_id: number;
-  quantity: number;
-  title: string;
-  image_url: string;
-  price: number;
+export interface OrderInList {
+  id: number;
+  subtotal: number;
+  shipping: number;
+  tax: number;
   total: number;
+  order_number: number;
+}
+
+export interface OrdersResponse {
+  data: OrderInList[];
+  meta: {
+    current_page: number;
+    from: number | null;
+    last_page: number;
+    per_page: number;
+    to: number | null;
+    total: number;
+  };
+  links: {
+    first: string;
+    last: string | null;
+    prev: string | null;
+    next: string | null;
+  };
 }
 
 const API_BASE_URL = '/api';
@@ -287,6 +314,31 @@ export async function checkout(data: CheckoutRequest): Promise<Order> {
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
     throw new Error(errorData.error || 'Failed to create order');
+  }
+
+  return response.json();
+} 
+
+/**
+ * Get orders list
+ */
+export async function getOrders(page: number = 1): Promise<OrdersResponse> {
+  const response = await authFetch(`${API_BASE_URL}/orders?page=${page}`);
+  return response.json();
+}
+
+export async function getOrderDetails(orderId: number): Promise<Order> {
+  const response = await authFetch(`${API_BASE_URL}/orders/${orderId}`);
+  
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    if (response.status === 401) {
+      throw new Error('Please login to view order details');
+    } else if (response.status === 404) {
+      throw new Error('Order not found');
+    } else {
+      throw new Error(errorData.error || 'Failed to fetch order details');
+    }
   }
 
   return response.json();

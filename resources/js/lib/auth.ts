@@ -52,8 +52,9 @@ export async function login(credentials: LoginCredentials): Promise<LoginRespons
 
     const data: LoginResponse = await response.json();
     
-    // Store token and user data
-    localStorage.setItem(TOKEN_KEY, data.token);
+    // Store token and user data - ensure token doesn't have Bearer prefix when storing
+    const tokenToStore = data.token.startsWith('Bearer ') ? data.token.substring(7) : data.token;
+    localStorage.setItem(TOKEN_KEY, tokenToStore);
     localStorage.setItem(USER_KEY, JSON.stringify(data.user));
     
     return data;
@@ -118,7 +119,8 @@ export function logout(): void {
  * Get stored authentication token
  */
 export function getToken(): string | null {
-  return localStorage.getItem(TOKEN_KEY);
+  const token = localStorage.getItem(TOKEN_KEY);
+  return token ? token.replace(/^Bearer\s+/i, '') : null;
 }
 
 /**
@@ -154,7 +156,8 @@ export function createAuthenticatedFetch() {
     };
 
     if (token) {
-      headers.Authorization = `Bearer ${token}`;
+      // Ensure token is clean before adding Bearer prefix
+      headers.Authorization = `Bearer ${token.replace(/^Bearer\s+/i, '')}`;
     }
 
     const response = await fetch(url, {
@@ -162,9 +165,13 @@ export function createAuthenticatedFetch() {
       headers,
     });
 
-    if (response.status === 401) {
-      logout();
-      window.location.href = '/login';
+    // Only handle 401 for the /user endpoint
+    if (response.status === 401 && url.endsWith('/user')) {
+      const data = await response.json().catch(() => ({}));
+      if (data.message === 'Unauthenticated.') {
+        logout();
+        window.location.href = '/login';
+      }
     }
 
     return response;

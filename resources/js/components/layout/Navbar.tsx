@@ -55,6 +55,14 @@ export const Navbar: React.FC = () => {
               >
                 Products
               </Link>
+              {isAuthenticated && (
+                <Link 
+                  to="/orders" 
+                  className="text-black hover:text-gray-700 font-medium text-base font-roboto flex items-center gap-2"
+                >
+                  Orders
+                </Link>
+              )}
               <button className="bg-black text-white px-4 py-2 rounded text-sm font-medium font-roboto hover:bg-gray-800 whitespace-nowrap">
                 Sell Your Product
               </button>
@@ -152,6 +160,15 @@ export const Navbar: React.FC = () => {
               >
                 Products
               </Link>
+              {isAuthenticated && (
+                <Link 
+                  to="/orders" 
+                  className="text-gray-900 hover:text-gray-700 font-medium font-roboto py-2 flex items-center gap-2"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Orders
+                </Link>
+              )}
               <button className="bg-black text-white px-4 py-2 rounded text-sm font-medium font-roboto hover:bg-gray-800 text-left">
                 Sell Your Product
               </button>

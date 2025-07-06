@@ -1,10 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 
 export const AlertBar: React.FC = () => {
   const { isAuthenticated } = useAuth();
-  const [isVisible, setIsVisible] = useState(!isAuthenticated);
+  const [isVisible, setIsVisible] = useState(true);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      setIsVisible(false);
+    }
+  }, [isAuthenticated]);
 
   if (!isVisible) return null;
 

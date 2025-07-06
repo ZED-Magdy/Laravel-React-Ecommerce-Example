@@ -39,7 +39,7 @@ info:
 servers:
   - url: http://localhost:8000/api
     description: Development server
-  - url: https://api.daftra.com/api
+  - url: https://ecom.gym.maxzod.com/api
     description: Production server
 
 security:

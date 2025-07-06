@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { OrderInList, OrdersResponse, getOrders } from '@/lib/api';
+import { useNavigate, Link } from 'react-router-dom';
 
 export const OrdersListPage: React.FC = () => {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, loading: authLoading } = useAuth();
+  const navigate = useNavigate();
   const [orders, setOrders] = useState<OrderInList[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -18,12 +20,16 @@ export const OrdersListPage: React.FC = () => {
   });
 
   useEffect(() => {
-    const fetchOrders = async () => {
-      if (!isAuthenticated) {
-        window.location.href = '/login';
-        return;
-      }
+    if (authLoading) {
+      return; // Wait for auth state to be determined
+    }
 
+    if (!isAuthenticated) {
+      navigate('/login', { state: { from: '/orders' } });
+      return;
+    }
+
+    const fetchOrders = async () => {
       setLoading(true);
       setError(null);
 
@@ -39,7 +45,7 @@ export const OrdersListPage: React.FC = () => {
     };
 
     fetchOrders();
-  }, [isAuthenticated, currentPage]);
+  }, [isAuthenticated, authLoading, currentPage, navigate]);
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
@@ -126,12 +132,12 @@ export const OrdersListPage: React.FC = () => {
               <h3 className="mt-2 text-sm font-medium text-gray-900">No orders</h3>
               <p className="mt-1 text-sm text-gray-500">Get started by creating a new order.</p>
               <div className="mt-6">
-                <a
-                  href="/products"
+                <Link
+                  to="/"
                   className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
                 >
                   Browse Products
-                </a>
+                </Link>
               </div>
             </div>
           ) : (
@@ -149,12 +155,12 @@ export const OrdersListPage: React.FC = () => {
                         </h3>
                         
                       </div>
-                      <a
-                        href={`/order/${order.id}`}
+                      <Link
+                        to={`/order/${order.id}`}
                         className="text-sm font-medium text-black hover:text-gray-700"
                       >
                         View Details →
-                      </a>
+                      </Link>
                     </div>
 
                     <div className="mt-4 border-t border-gray-200 pt-4">

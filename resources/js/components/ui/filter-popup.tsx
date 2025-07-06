@@ -69,8 +69,8 @@ export const FilterPopup: React.FC<FilterPopupProps> = ({
       categoriesToApply = [];
     }
     onApplyFilters({
-      priceMin: priceRange[0] === apiPriceRange.min_price ? undefined : priceRange[0],
-      priceMax: priceRange[1] === apiPriceRange.max_price ? undefined : priceRange[1],
+      priceMin: priceRange[0],
+      priceMax: priceRange[1],
       categories: categoriesToApply,
     });
     setIsOpen(false);
@@ -80,7 +80,7 @@ export const FilterPopup: React.FC<FilterPopupProps> = ({
     if (apiPriceRange.max_price > 0) {
       setPriceRange([apiPriceRange.min_price, apiPriceRange.max_price]);
     }
-    setSelectedCategories([]);
+    setSelectedCategories(['all']);
     onClearFilters();
     setIsOpen(false);
   };

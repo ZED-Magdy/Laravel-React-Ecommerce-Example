@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Orders;
 
+use App\Events\OrderPlaced;
 use App\Models\Order;
 use App\Models\Product;
 use Exception;
@@ -84,6 +85,8 @@ final readonly class CheckoutAction
                 Cache::put('order_'.$order->id.'_'.$data['user_id'], $order->load('items'), now()->addHour());
                 Cache::forget('orders_'.$data['user_id']);
                 Cache::put('next_order_number', $orderNumber + 1, now()->addHour());
+
+                event(new OrderPlaced($order->id));
 
                 return $order;
             });

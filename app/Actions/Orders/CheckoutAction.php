@@ -42,7 +42,7 @@ final readonly class CheckoutAction
                 });
 
                 /** @var int $shipping */
-                $shipping = config('order.shipping_in_cents', 1500);
+                $shipping = config('order.shipping_in_cents', 1500) / 100;
                 /** @var float $taxRate */
                 $taxRate = config('order.tax_rate', 15);
                 $tax = $subtotal * $taxRate / 100;

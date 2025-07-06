@@ -53,7 +53,7 @@ final readonly class CalculateCartAction
         });
 
         /** @var int $shipping */
-        $shipping = config('order.shipping_in_cents');
+        $shipping = config('order.shipping_in_cents') / 100;
         /** @var float $taxRate */
         $taxRate = config('order.tax_rate');
         $tax = $subtotal * $taxRate / 100;

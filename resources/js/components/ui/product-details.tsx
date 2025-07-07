@@ -52,7 +52,7 @@ export const ProductDetails: React.FC<ProductDetailsProps> = ({
 
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
-      <SheetContent side="right" className="w-full sm:w-[540px] p-0">
+      <SheetContent side="right" className="w-full sm:w-[540px] overflow-y-auto p-0">
         <div className="h-full flex flex-col">
           <div className="relative aspect-square w-full">
             <img

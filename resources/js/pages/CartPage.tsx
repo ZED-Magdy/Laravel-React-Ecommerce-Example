@@ -292,7 +292,7 @@ const CartItemCard: React.FC<CartItemCardProps> = ({ item, onUpdateQuantity, onR
   return (
     <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-4 flex gap-4">
       {/* Product Image */}
-      <div className="relative w-48 h-54 flex-shrink-0">
+      <div className="relative w-32 md:w-48 h-54 flex-shrink-0">
         <img
           src={item.product.image}
           alt={item.product.name}
@@ -335,30 +335,6 @@ const CartItemCard: React.FC<CartItemCardProps> = ({ item, onUpdateQuantity, onR
             />
           </div>
         </div>
-      </div>
-
-      {/* Delete Button */}
-      <div className="flex items-start pt-4">
-        <button
-          onClick={() => onRemove(item.id)}
-          className="w-6 h-6 flex items-center justify-center text-red-500 hover:text-red-700 transition-colors"
-        >
-          <svg
-            width="18"
-            height="20"
-            viewBox="0 0 18 20"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M1 5h16M7 9v6M11 9v6M2 5l1 12a2 2 0 002 2h8a2 2 0 002-2l1-12M6 5V3a1 1 0 011-1h4a1 1 0 011 1v2"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </button>
       </div>
     </div>
   );
